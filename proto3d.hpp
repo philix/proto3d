@@ -1113,70 +1113,80 @@ class Texture {
   }
 };
 
-class Texture2D : public Texture {
- public:
-  Texture2D() = default;
+namespace detail {
 
-  Texture2D(GLuint id) : Texture(id) {}  // NOLINT
+template<GLenum kTarget, GLenum kBinding>
+class TextureCommonTemplate : public Texture {
+ public:
+  TextureCommonTemplate() = default;
+  TextureCommonTemplate(GLuint id) : Texture(id) {}  // NOLINT
 
   void Bind() const {
-    glBindTexture(GL_TEXTURE_2D, id);
+    glBindTexture(kTarget, id);
   }
 
   void Unbind() const {
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(kTarget, 0);
   }
 
   bool Bound() {
     GLint current_texture;
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &current_texture);
-    return id && id == (GLuint)current_texture;
+    glGetIntegerv(kBinding, &current_texture);
+    return this->id && this->id == (GLuint)current_texture;
   }
 
   template<typename T>
   void SetParameter(GLenum pname, T param) {
     assert(Bound());
     detail::TexParameterSetterFn<T> setter;
-    setter(GL_TEXTURE_2D, pname, param);
+    setter(kTarget, pname, param);
   }
 
   template<typename T, typename InternalFormatT = GLfloat>
   void SetVecParameter(GLenum pname, const T *params) {
     assert(Bound());
     detail::VecTexParameterSetterFn<T, InternalFormatT> setter;
-    setter(GL_TEXTURE_2D, pname, params);
+    setter(kTarget, pname, params);
   }
+};
 
-  template<typename T, typename InternalFormatT = GLfloat>
-  void SetBorderColor(const T* color) {
-    SetVecParameter<T, InternalFormatT>(GL_TEXTURE_BORDER_COLOR, color);
-  }
+};  // namespace detail
+
+// Since OpenGL 1.1
+class Texture2D : public detail::TextureCommonTemplate<GL_TEXTURE_2D, GL_TEXTURE_BINDING_2D> {
+ public:
+  Texture2D() = default;
+  Texture2D(GLuint id)  // NOLINT
+    : detail::TextureCommonTemplate<GL_TEXTURE_2D, GL_TEXTURE_BINDING_2D>(id) {}
 
   /// Sets GL_TEXTURE_WRAP_(S|T) and GL_TEXTURE_(MIN|MAG)_FILTER
   ///
   /// @param wrap
-  /// GL_CLAMP(deprecated), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER, GL_REPEAT,
-  /// GL_MIRRORED_REPEAT.
+  ///   GL_CLAMP_TO_EDGE
+  ///   GL_CLAMP_TO_BORDER
+  ///   GL_REPEAT
+  ///   GL_MIRRORED_REPEAT.
   ///
   /// @param filter
   ///  - `GL_NEAREST`: Returns the pixel that is closest to the coordinates.
   ///  - `GL_LINEAR`:  Returns the weighted average of the 4 pixels surrounding the
-  ///  given coordinates.
+  ///    given coordinates.
   ///  - `GL_NEAREST_MIPMAP_NEAREST`, `GL_LINEAR_MIPMAP_NEAREST`,
   ///  `GL_NEAREST_MIPMAP_LINEAR`, `GL_LINEAR_MIPMAP_LINEAR`: Sample from mipmaps
   ///  instead.
   ///
-  void SetWrapAndFilter(GLint wrap = GL_CLAMP_TO_EDGE, GLint filter = GL_LINEAR) {
+  void SetFilterAndWrap(GLint filter = GL_LINEAR, GLint wrap = GL_CLAMP_TO_EDGE) {
     assert(Bound());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
   }
 
   void GenerateMipmaps() {
     assert(Bound());
     glGenerateMipmap(GL_TEXTURE_2D);
+    PROTO3D_CHECK_GL_ERROR("glGenerateMipmap");
   }
 
   /// @param pixels For format=GL_RGBA it's a GLubyte[width][height][4] matrix
@@ -1192,6 +1202,7 @@ class Texture2D : public Texture {
         format,  // format
         GL_UNSIGNED_BYTE,  // color component datatype
         pixels);
+    PROTO3D_CHECK_GL_ERROR("glTexImage2D");
   }
 
 #ifdef PROTO3D_USE_STB
