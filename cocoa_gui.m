@@ -21,7 +21,7 @@
 #include <CoreVideo/CVDisplayLink.h>
 #include <ApplicationServices/ApplicationServices.h>
 
-#include "gui.h"
+#include "gui_common.h"
 
 static GlobalGui *_global_gui_hack;
 

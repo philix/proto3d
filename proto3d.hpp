@@ -13,19 +13,9 @@
 # include <cstdio>
 #endif
 
-#ifdef PROTO3D_USE_GLEW
-# include "GL/glew.h"  // Must be included before OpenGL
-#endif
-
-#ifdef PROTO3D_USE_SDL
-# include "SDL_opengl.h"
-#else
-# include <OpenGL/gl3ext.h> // Apple
-#endif
-
 #ifdef PROTO3D_USE_GLM
-# include "glm/glm.hpp"
-# include "glm/gtc/type_ptr.hpp"
+/* # include "glm/glm.hpp" */
+/* # include "glm/gtc/type_ptr.hpp" */
 #endif
 
 #ifdef PROTO3D_USE_STB
@@ -150,7 +140,7 @@ stbi_uc* stbi_load(const char*, int*, int*, int*, int);
 // including proto3d headers.
 #ifndef PROTO3D_TRACE
 # include <cstdio>  // NOLINT
-# define PROTO3D_TRACE(...) fprintf(stderr, __VA_ARGS__)
+# define PROTO3D_TRACE(...) fprintf(stderr, __VA_ARGS__); fflush(stderr)
 #endif
 // }}} END of Macros
 
@@ -208,9 +198,9 @@ class Image {
   GLenum GLPixelFormat() {
     switch (pixel_format) {
       case STBI_grey:
-        return GL_LUMINANCE;
+        /* return GL_LUMINANCE; */
       case STBI_grey_alpha:
-        return GL_LUMINANCE_ALPHA;
+        /* return GL_LUMINANCE_ALPHA; */
       case STBI_rgb:
         return GL_RGB;
       case STBI_rgb_alpha:
@@ -1165,7 +1155,8 @@ class Texture2D : public Texture {
   /// Sets GL_TEXTURE_WRAP_(S|T) and GL_TEXTURE_(MIN|MAG)_FILTER
   ///
   /// @param wrap
-  /// GL_CLAMP, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER, GL_REPEAT, GL_MIRRORED_REPEAT.
+  /// GL_CLAMP(deprecated), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER, GL_REPEAT,
+  /// GL_MIRRORED_REPEAT.
   ///
   /// @param filter
   ///  - `GL_NEAREST`: Returns the pixel that is closest to the coordinates.
@@ -1175,7 +1166,7 @@ class Texture2D : public Texture {
   ///  `GL_NEAREST_MIPMAP_LINEAR`, `GL_LINEAR_MIPMAP_LINEAR`: Sample from mipmaps
   ///  instead.
   ///
-  void SetWrapAndFilter(GLint wrap = GL_CLAMP, GLint filter = GL_LINEAR) {
+  void SetWrapAndFilter(GLint wrap = GL_CLAMP_TO_EDGE, GLint filter = GL_LINEAR) {
     assert(Bound());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
@@ -1393,7 +1384,7 @@ void proto3d::gl::ReportAllErrorsViaCallback(const char *origin) {
       0,
       nullptr,
       GL_TRUE);
-  PROTO3D_CHECK_GL_ERROR("glDebugMessageCallback");
+  PROTO3D_CHECK_GL_ERROR("glDebugMessageControl");
 }
 
 #endif  // PROTO3D_USE_GL_VERSION_4_3

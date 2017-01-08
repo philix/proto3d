@@ -1,5 +1,5 @@
-#ifndef COMMON_GUI_H
-#define COMMON_GUI_H
+#ifndef GUI_COMMON_H
+#define GUI_COMMON_H
 /// @file This header is included by all platform specific GUI headers.
 /// And contains the headers and implementation of common gui functions that
 /// work in any platform. COMMON_GUI_IMPLEMENTATION should be defined before
@@ -787,11 +787,11 @@ void gui_set_gamma_ramp(GMonitor *monitor, const GGammaRamp *ramp);
 // }}}
 
 // Internal input abstract API {{{
-bool gui_is_printable(int key);
+bool gui_is_printable(GKey key);
 // }}} 
 
 // Public event abstract API {{{
-void gui_input_key(GWindow *window, int key, int scancode, int action, int mods);
+void gui_input_key(GWindow *window, GKey key, int scancode, int action, int mods);
 void gui_input_char(GWindow *window, unsigned int codepoint, int mods, bool plain);
 void gui_input_scroll(GWindow *window, double xoffset, double yoffset);
 void gui_input_mouse_click(GWindow *window, GMouseButton button, int action, int mods);
@@ -861,8 +861,11 @@ void gui_set_time(GlobalGui *gui, double time);
 };
 #endif
 
-#ifdef COMMON_GUI_IMPLEMENTATION
-// Common GUI Implementation {{{
+#ifdef GUI_COMMON_IMPLEMENTATION
+// GUI Common Implementation {{{
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <math.h>
 #include <string.h>
 #include <limits.h>
@@ -958,8 +961,8 @@ void gui_terminate(GlobalGui *gui)
 // Lexically compare video modes (used by qsort)
 static int compare_video_modes(const void *fp, const void *sp)
 {
-    const GVideoMode *fm = fp;
-    const GVideoMode *sm = sp;
+    const GVideoMode *fm = (GVideoMode *)fp;
+    const GVideoMode *sm = (GVideoMode *)sp;
     const int fbpp = fm->red_bits + fm->green_bits + fm->blue_bits;
     const int sbpp = sm->red_bits + sm->green_bits + sm->blue_bits;
     const int farea = fm->width * fm->height;
@@ -1077,7 +1080,7 @@ void gui_input_monitor_change(GlobalGui *gui, char **error)
 
 GMonitor *alloc_monitor(const char *name, int width_mm, int height_mm)
 {
-    GMonitor *monitor = calloc(1, sizeof(GMonitor));
+    GMonitor *monitor = (GMonitor *)calloc(1, sizeof(GMonitor));
     monitor->name = strdup(name);
     monitor->width_mm = width_mm;
     monitor->height_mm = height_mm;
@@ -1101,9 +1104,9 @@ void free_monitor(GMonitor *monitor)
 
 void alloc_gamma_arrays(GGammaRamp *ramp, uint32_t size)
 {
-    ramp->red = calloc(size, sizeof(uint16_t));
-    ramp->green = calloc(size, sizeof(uint16_t));
-    ramp->blue = calloc(size, sizeof(uint16_t));
+    ramp->red = (uint16_t *)calloc(size, sizeof(uint16_t));
+    ramp->green = (uint16_t *)calloc(size, sizeof(uint16_t));
+    ramp->blue = (uint16_t *)calloc(size, sizeof(uint16_t));
     ramp->size = size;
 }
 
@@ -1363,7 +1366,7 @@ static void set_cursor_mode(GWindow *window, GCursorMode new_mode, char **error)
       gui_platform_set_cursor_pos(window, width / 2, height / 2);
     }
 
-    gui_platform_set_cursor_mode(window, window->cursor_mode);
+    gui_platform_set_cursor_mode(window, (GCursorMode)window->cursor_mode);
   }
 }
 
@@ -1376,7 +1379,7 @@ static void set_sticky_keys(GWindow *window, int enabled)
 
   if (!enabled) {
     // Release all sticky keys
-    for (GKey i = 0;  i <= GUI_KEY_LAST;  i++) {
+    for (int i = 0;  i <= GUI_KEY_LAST;  i++) {
       if (window->keys[i] == GUI_KEY_STICK) {
         window->keys[i] = kRelease;
       }
@@ -1395,7 +1398,7 @@ static void set_sticky_mouse_button(GWindow *window, int enabled)
 
   if (!enabled) {
     // Release all sticky mouse buttons
-    for (GMouseButton i = 0; i <= kMouseButtonLast; i++) {
+    for (int i = 0; i <= kMouseButtonLast; i++) {
       if (window->mouse_buttons[i] == kMouseButtonStick) {
         window->mouse_buttons[i] = kRelease;
       }
@@ -1490,8 +1493,8 @@ void gui_input_mouse_click(GWindow *window, GMouseButton button, int action, int
   GWindowEvent event;
   event.type = kWindowMouse;
   event.window = window;
-  event.e.mouse.button = button;
-  event.e.mouse.action = action;
+  event.e.mouse.button = (GMouseButton)button;
+  event.e.mouse.action = (GMouseAction)action;
   event.e.mouse.mods = mods;
 
   window->gui->handle_event(event);
@@ -1558,16 +1561,16 @@ void gui_input_window_focus(GWindow *window, bool focused)
     window->gui->handle_event(event);
 
     // Release all pressed keyboard keys
-    for (GKey i = 0; i <= GUI_KEY_LAST; i++) {
+    for (int i = 0; i <= GUI_KEY_LAST; i++) {
       if (window->keys[i] == kPress) {
-        gui_input_key(window, i, 0, kRelease, 0);
+        gui_input_key(window, (GKey)i, 0, kRelease, 0);
       }
     }
 
     // Release all pressed mouse buttons
-    for (GMouseButton i = 0;  i <= kMouseButtonLast;  i++) {
+    for (int i = 0;  i <= kMouseButtonLast;  i++) {
       if (window->mouse_buttons[i] == kPress) {
-        gui_input_mouse_click(window, i, kRelease, 0);
+        gui_input_mouse_click(window, (GMouseButton)i, kRelease, 0);
       }
     }
   }
@@ -1660,7 +1663,7 @@ GWindow *gui_create_window(GlobalGui *gui,
   win_config.height  = height;
   win_config.title   = title;
 
-  GWindow *window = calloc(1, sizeof(GWindow));
+  GWindow *window = (GWindow *)calloc(1, sizeof(GWindow));
   window->gui = gui;
   window->next = gui->window_list_head;
   gui->window_list_head = window;
@@ -1958,18 +1961,14 @@ void gui_set_cursor_pos(GWindow *window, double xpos, double ypos)
   }
 }
 
-GCursor *gui_create_cursor(GlobalGui *gui, const GImage *image, int xhot, int yhot)
-{
-    GCursor *cursor;
-
+GCursor *gui_create_cursor(GlobalGui *gui, const GImage *image, int xhot, int yhot) {
     assert(image != NULL);
 
-    cursor = calloc(1, sizeof(GCursor));
+    GCursor *cursor = (GCursor *)calloc(1, sizeof(GCursor));
     cursor->next = gui->cursor_list_head;
     gui->cursor_list_head = cursor;
 
-    if (!gui_platform_create_cursor(cursor, image, xhot, yhot))
-    {
+    if (!gui_platform_create_cursor(cursor, image, xhot, yhot)) {
         gui_destroy_cursor(gui, (GCursor *) cursor);
         return NULL;
     }
@@ -1989,7 +1988,7 @@ GCursor *gui_create_standard_cursor(GlobalGui *gui, GCursorShape shape, char **e
     return NULL;
   }
 
-  GCursor *cursor = calloc(1, sizeof(GCursor));
+  GCursor *cursor = (GCursor *)calloc(1, sizeof(GCursor));
   cursor->next = gui->cursor_list_head;
   gui->cursor_list_head = cursor;
 
@@ -2057,6 +2056,9 @@ void gui_set_time(GlobalGui *gui, double time)
 // gui_get_timer_frequency() is implemented in platform code
 // }}}
 // }}}
-#endif  // COMMON_GUI_IMPLEMENTATION
+#ifdef __cplusplus
+};
+#endif
+#endif  // GUI_COMMON_IMPLEMENTATION
 
-#endif  // COMMON_GUI_H
+#endif  // GUI_COMMON_H_
