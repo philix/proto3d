@@ -875,7 +875,7 @@ extern "C" {
 // Initialization API {{{
 static void fail_event_handler(GWindowEvent event) {
   assert(false &&
-      "Events should not be triggered before fui GlobalGui initialization.");
+      "Events should not be triggered before GlobalGui initialization.");
 }
 
 static void null_event_handler(GWindowEvent event) {

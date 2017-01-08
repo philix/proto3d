@@ -18,32 +18,37 @@ try:
 except ImportError:
     import urllib2
 
-INCLUDE_HELP = br'''// This file was GENERATED with proto3d_glcorearb_gen.py, part of
-// proto3d (hosted at https://github.com/philix/proto3d).
+INCLUDE_HELP = br'''// This file was GENERATED with proto3d_glcorearb_gen.py,
+// part of proto3d (hosted at https://github.com/philix/proto3d).
+//
+// vim: fdm=marker
 //
 // You MUST
 //
 //     #define PROTO3D_GLCOREARB_IMPLEMENTATION
 //
-// in EXACTLY _one_ C or C++ file that includes this header, BEFORE the include,
-// like this:
+// in EXACTLY _one_ C or C++ file that includes this header,
+// BEFORE the include, like this:
 //
 //     #define PROTO3D_GLCOREARB_IMPLEMENTATION
 //     #include "proto3d_glcorearb.h"
 //
-// All other files should just #include "proto3d_glcorearb.h" without the #define.
+// All other files should just #include "proto3d_glcorearb.h"
+// without the #define.
 //
-// proto3d_glcorearb.h is for use with OpenGL core profile implementations.
 //
+// proto3d_glcorearb.h is for use with OpenGL core profile
+// implementations.
 //
 // It includes only APIs in the latest OpenGL core profile
-// implementation together with APIs in newer ARB extensions which
-// can be supported by the core profile. It does not, and never will
-// include functionality removed from the core profile, such as
-// fixed-function vertex and fragment processing.
+// implementation together with APIs in newer ARB extensions
+// which can be supported by the core profile. It does not, and
+// never will include functionality removed from the core
+// profile, such as fixed-function vertex and fragment
+// processing.
 //
-// DO NOT #include both proto3d_glcorearb.h and either of <GL/gl.h> or
-// <GL/glext.h> in the same source file.
+// DO NOT #include both proto3d_glcorearb.h and either of
+// <GL/gl.h> or <GL/glext.h> in the same source file.
 '''
 
 GLCOREARB_URL = 'https://www.opengl.org/registry/api/GL/glcorearb.h'

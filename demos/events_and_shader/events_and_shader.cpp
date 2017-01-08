@@ -25,6 +25,8 @@ VBO vbo;
 VAO vao;
 Texture2D texture;
 
+void FlushFrame();
+
 void DumpEventString(GWindowEvent *event) {
   GWindowEventData *e = &event->e;
 
@@ -127,6 +129,9 @@ void HandleEvent(GWindowEvent event) {
           break;
       }
       break;
+    case kWindowDamage:
+      FlushFrame();
+      break;
     case kWindowClose:
       event.window->closed = true;
       break;
@@ -146,7 +151,25 @@ int ReadShaderSource(const char *path, char *buffer, size_t size) {
   while ((count_read = read(fd, buffer, size)) > 0) {
     buffer[count_read] = 0;
   }
-  return (count_read < 0) ? count_read : 0;
+  return count_read;
+}
+
+void FlushFrame() {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glDrawArrays(GL_TRIANGLES, 0, 3);
+  gl_swap_buffers(main_window);
+}
+
+std::string GetBaseRelativePath(const char *argv_0) {
+  std::string binary_relative_path = argv_0;
+
+  int sep_pos;
+#if defined(_WIN32) || defined(WIN32)
+  sep_pos = binary_relative_path.rfind('\\');
+#else
+  sep_pos = binary_relative_path.rfind('/');
+#endif
+  return binary_relative_path.substr(0, sep_pos + 0);
 }
 
 int main(int argc, char *argv[]) {
@@ -154,7 +177,7 @@ int main(int argc, char *argv[]) {
   gui_init(&gui, &error);
 
   // Create window and OpenGL context
-  main_window = gui_create_window(&gui, 800, 600, "Felipe", NULL, &error);
+  main_window = gui_create_window(&gui, 800, 600, "proto3d", NULL, &error);
   if (error) {
     puts(error);
     return 1;
@@ -164,7 +187,7 @@ int main(int argc, char *argv[]) {
   Proto3dOpenLibGlAndLoadCoreProfile();
   int major, minor;
   if (Proto3dGlLoadedVersion(&major, &minor) < 0) {
-    perror("proto3d: failed to load OpenGL library");
+    fprintf(stderr, "proto3d: failed to load OpenGL library");
     return 2;
   }
 #ifndef NDEBUG
@@ -180,12 +203,12 @@ int main(int argc, char *argv[]) {
   // all events.
   gui_poll_events(&gui);
 
-  string base_path = "/Users/felipe/code/guiprog/proto3d/demos/events_and_shader";
+  string base_relative_path = GetBaseRelativePath(argv[0]);
 
   // Compile shaders
   char shader_source[4096];
-  string vertex_shader_path = base_path + "/vertex1.vert";
-  string fragment_shader_path = base_path + "/fragment1.frag";
+  string vertex_shader_path = base_relative_path + "/vertex1.vert";
+  string fragment_shader_path = base_relative_path + "/fragment1.frag";
   if (ReadShaderSource(vertex_shader_path.c_str(), shader_source, 4096) < 0) {
     perror("ReadShaderSource");
     return 3;
@@ -240,7 +263,7 @@ int main(int argc, char *argv[]) {
   PROTO3D_CHECK_GL_ERROR("glVertexAttribPointer");
 
   // Load the texture into the triangle
-  auto image = stb::Image::CreateFromFile((base_path + "/hazard.png").c_str());
+  auto image = stb::Image::CreateFromFile((base_relative_path + "/hazard.png").c_str());
 
   glActiveTexture(GL_TEXTURE0);
   program.SetUniform("tex", 0);
@@ -254,9 +277,9 @@ int main(int argc, char *argv[]) {
 
   texture.Gen();
   texture.Bind();
-  texture.SetWrapAndFilter();
+  texture.SetFilterAndWrap(GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
   texture.LoadImage(image.get());
-  // texture.GenerateMipmaps();
+  texture.GenerateMipmaps();
 
   // connect the uv coords to the "vertTexCoord" attribute of the vertex
   // shader
@@ -269,20 +292,16 @@ int main(int argc, char *argv[]) {
       5 * sizeof(GLfloat),
       (const GLvoid*)(3 * sizeof(GLfloat)));
 
+
+  program.Bind();
+  vao.Bind();
+  texture.Bind();
+
   // Attach our even handler
   gui.handle_event = HandleEvent;
 
   // Render the first frame
-  {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    program.Bind();
-    vao.Bind();
-    texture.Bind();
-
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    gl_swap_buffers(main_window);
-  }
+  FlushFrame();
   
   do {
     gui_poll_events(&gui);
