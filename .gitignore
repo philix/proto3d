@@ -16,4 +16,4 @@ CMakeFiles
 # Demo that are tracked independently
 demos/*
 !demos/CMakeLists.txt
-!demos/shader
+!demos/events_and_shader
