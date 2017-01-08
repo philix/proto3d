@@ -104,7 +104,7 @@ void Proto3dOpenLibGl(void);
 void Proto3dCloseLibGl(void);
 void Proto3dGlLoadAllCoreProfileProcs(void);
 int  Proto3dOpenLibGlAndLoadCoreProfile(void);
-int  Proto3dGlLoadedVersion(GLint &major, GLint &minor);
+int  Proto3dGlLoadedVersion(GLint *major, GLint *minor);
 Proto3dGlProc Proto3dGlGetProcAddress(const char *proc);
 
 // OpenGL function pointer declarations {{{
@@ -115,7 +115,7 @@ f.write(b'// }}} End OpenGL function pointer declarations\n')
 
 f.write(br'''
 #ifdef __cplusplus
-}
+};
 #endif
 ''')
 
@@ -123,6 +123,10 @@ print('Generating loader API implementation...')
 f.write(br'''
 #if defined(PROTO3D_GLCOREARB_IMPLEMENTATION) && !defined(PROTO3D_GLCOREARB_IMPLEMENTATION_DONE)
 # define PROTO2D_GLCOREARB_IMPLEMENTATION_DONE
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // OpenGL function pointers {{{
 ''')
@@ -136,14 +140,21 @@ void Proto3dGlLoadAllCoreProfileProcs(void) {
 for proc in procs:
     f.write('  {0[p]} = ({0[p_t]})Proto3dGlGetProcAddress("{0[p]}");\n'.format(proc_t(proc)).encode('utf-8'))
 f.write('// }}}\n')
-f.write('}\n')
+f.write(br'''}
 
-f.write(br'''
+#ifdef __cplusplus
+};
+#endif
+
 #ifdef _WIN32
 # define WIN32_LEAN_AND_MEAN 1
 # include <windows.h>
 
 static HMODULE proto3d_libgl;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void Proto3dOpenLibGl(void) {
   proto3d_libgl = LoadLibraryA("opengl32.dll");
@@ -162,11 +173,19 @@ Proto3dGlProc Proto3dGlGetProcAddress(const char *proc) {
   }
   return res;
 }
+
+#ifdef __cplusplus
+};
+#endif
 #elif defined(__APPLE__) || defined(__APPLE_CC__)
 # include <Carbon/Carbon.h>
 
-CFBundleRef bundle;
-CFURLRef bundle_url;
+static CFBundleRef bundle;
+static CFURLRef bundle_url;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void Proto3dOpenLibGl(void) {
   bundle_url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
@@ -191,12 +210,21 @@ Proto3dGlProc Proto3dGlGetProcAddress(const char *proc) {
   CFRelease(procname);
   return res;
 }
+
+#ifdef __cplusplus
+};
+#endif
+
 #else  // Linux
 # include <dlfcn.h>
 # include <GL/glx.h>
 
 static void *proto3d_libgl;
 static PFNGLXGETPROCADDRESSPROC glx_get_proc_address;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void Proto3dOpenLibGl(void) {
   proto3d_libgl = dlopen("libGL.so.1", RTLD_LAZY | RTLD_GLOBAL);
@@ -216,6 +244,15 @@ Proto3dGlProc Proto3dGlGetProcAddress(const char *proc) {
   }
   return res;
 }
+
+#ifdef __cplusplus
+};
+#endif
+
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 int Proto3dGlLoadedVersion(GLint *major, GLint *minor) {
@@ -242,6 +279,10 @@ int Proto3dOpenLibGlAndLoadCoreProfile(void)
   }
   return major < 3 ? -1 : 0;
 }
+
+#ifdef __cplusplus
+};
+#endif
 ''')
 
 f.write(br'''
