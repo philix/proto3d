@@ -5,7 +5,7 @@ set (CMAKE_CXX_STANDARD 11)
 
 # Maximum warnings level minus some
 set(CMAKE_CXX_FLAGS
-  "${CMAKE_CXX_FLAGS} -g -Wall -pedantic -Wextra -Wno-unused-parameter -Wno-writable-strings")
+  "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -Wno-unused-parameter -Wno-writable-strings")
 
 # Extra flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_EXTRA_FLAGS}")
