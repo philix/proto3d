@@ -144,15 +144,22 @@ stbi_uc* stbi_load(const char*, int*, int*, int*, int);
 #endif
 // }}} END of Macros
 
-#define PROTO3D_CHECK_GL_ERROR(gl_api_func_name) \
+#ifndef PROTO3D_CHECK_GL_ERROR
+# ifdef NDEBUG
+#  define PROTO3D_CHECK_GL_ERROR(gl_proc_name_str)
+# else
+namespace proto3d { namespace gl { const char *LastErrorString(); } };
+#  define PROTO3D_CHECK_GL_ERROR(gl_proc_name_str) \
   { \
-    auto _last_error_str = proto3d::gl::LastErrorString(); \
+    const char *_last_error_str = proto3d::gl::LastErrorString(); \
     if (_last_error_str != nullptr) { \
       PROTO3D_TRACE( \
-          "OpenGL error at %s:%d: %s generated %s.\n", \
-          __FILE__, __LINE__, (gl_api_func_name), _last_error_str); \
+          "OpenGL error:%s:%d: %s is set after %s.\n", \
+          __FILE__, __LINE__, _last_error_str, (gl_proc_name_str)); \
     } \
   }
+# endif
+#endif
 
 #ifdef PROTO3D_USE_GL_VERSION_4_3
 extern "C" {
@@ -247,18 +254,22 @@ template<typename T>
 struct UniformSetterFn {
   void operator()(GLint location, T v0) {
     glUniform1f(location, v0);
+    PROTO3D_CHECK_GL_ERROR("glUniform1f");
   }
 
   void operator()(GLint location, T v0, T v1) {
     glUniform2f(location, v0, v1);
+    PROTO3D_CHECK_GL_ERROR("glUniform2f");
   }
 
   void operator()(GLint location, T v0, T v1, T v2) {
     glUniform3f(location, v0, v1, v2);
+    PROTO3D_CHECK_GL_ERROR("glUniform3f");
   }
 
   void operator()(GLint location, T v0, T v1, T v2, T v3) {
     glUniform4f(location, v0, v1, v2, v3);
+    PROTO3D_CHECK_GL_ERROR("glUniform4f");
   }
 };
 
@@ -266,18 +277,22 @@ template<>
 struct UniformSetterFn<GLint> {
   void operator()(GLint location, GLint v0) {
     glUniform1i(location, v0);
+    PROTO3D_CHECK_GL_ERROR("glUniform1i");
   }
 
   void operator()(GLint location, GLint v0, GLint v1) {
     glUniform2i(location, v0, v1);
+    PROTO3D_CHECK_GL_ERROR("glUniform2i");
   }
 
   void operator()(GLint location, GLint v0, GLint v1, GLint v2) {
     glUniform3i(location, v0, v1, v2);
+    PROTO3D_CHECK_GL_ERROR("glUniform3i");
   }
 
   void operator()(GLint location, GLint v0, GLint v1, GLint v2, GLint v3) {
     glUniform4i(location, v0, v1, v2, v3);
+    PROTO3D_CHECK_GL_ERROR("glUniform4i");
   }
 };
 
@@ -285,18 +300,22 @@ template<>
 struct UniformSetterFn<GLuint> {
   void operator()(GLint location, GLuint v0) {
     glUniform1ui(location, v0);
+    PROTO3D_CHECK_GL_ERROR("glUniform1ui");
   }
 
   void operator()(GLint location, GLuint v0, GLuint v1) {
     glUniform2ui(location, v0, v1);
+    PROTO3D_CHECK_GL_ERROR("glUniform2ui");
   }
 
   void operator()(GLint location, GLuint v0, GLuint v1, GLuint v2) {
     glUniform3ui(location, v0, v1, v2);
+    PROTO3D_CHECK_GL_ERROR("glUniform3ui");
   }
 
   void operator()(GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3) {
     glUniform4ui(location, v0, v1, v2, v3);
+    PROTO3D_CHECK_GL_ERROR("glUniform4ui");
   }
 };
 
@@ -312,6 +331,7 @@ template<>
 struct UniformVec1SetterFn<GLfloat> {
   void operator()(GLint location, GLsizei count, const GLfloat* value_ptr) {
     glUniform1fv(location, count, value_ptr);
+    PROTO3D_CHECK_GL_ERROR("glUniform1fv");
   }
 };
 
@@ -319,6 +339,7 @@ template<>
 struct UniformVec1SetterFn<GLint> {
   void operator()(GLint location, GLsizei count, const GLint* value_ptr) {
     glUniform1iv(location, count, value_ptr);
+    PROTO3D_CHECK_GL_ERROR("glUniform1iv");
   }
 };
 
@@ -326,6 +347,7 @@ template<>
 struct UniformVec1SetterFn<GLuint> {
   void operator()(GLint location, GLsizei count, const GLuint* value_ptr) {
     glUniform1uiv(location, count, value_ptr);
+    PROTO3D_CHECK_GL_ERROR("glUniform1uiv");
   }
 };
 
@@ -341,6 +363,7 @@ template<>
 struct UniformVec2SetterFn<GLfloat> {
   void operator()(GLint location, GLsizei count, const GLfloat* value_ptr) {
     glUniform2fv(location, count, value_ptr);
+    PROTO3D_CHECK_GL_ERROR("glUniform2fv");
   }
 };
 
@@ -348,6 +371,7 @@ template<>
 struct UniformVec2SetterFn<GLint> {
   void operator()(GLint location, GLsizei count, const GLint* value_ptr) {
     glUniform2iv(location, count, value_ptr);
+    PROTO3D_CHECK_GL_ERROR("glUniform2iv");
   }
 };
 
@@ -355,6 +379,7 @@ template<>
 struct UniformVec2SetterFn<GLuint> {
   void operator()(GLint location, GLsizei count, const GLuint* value_ptr) {
     glUniform2uiv(location, count, value_ptr);
+    PROTO3D_CHECK_GL_ERROR("glUniform2uiv");
   }
 };
 
@@ -370,6 +395,7 @@ template<>
 struct UniformVec3SetterFn<GLfloat> {
   void operator()(GLint location, GLsizei count, const GLfloat* value_ptr) {
     glUniform3fv(location, count, value_ptr);
+    PROTO3D_CHECK_GL_ERROR("glUniform3fv");
   }
 };
 
@@ -377,6 +403,7 @@ template<>
 struct UniformVec3SetterFn<GLint> {
   void operator()(GLint location, GLsizei count, const GLint* value_ptr) {
     glUniform3iv(location, count, value_ptr);
+    PROTO3D_CHECK_GL_ERROR("glUniform3iv");
   }
 };
 
@@ -384,6 +411,7 @@ template<>
 struct UniformVec3SetterFn<GLuint> {
   void operator()(GLint location, GLsizei count, const GLuint* value_ptr) {
     glUniform3uiv(location, count, value_ptr);
+    PROTO3D_CHECK_GL_ERROR("glUniform3uiv");
   }
 };
 
@@ -399,6 +427,7 @@ template<>
 struct UniformVec4SetterFn<GLfloat> {
   void operator()(GLint location, GLsizei count, const GLfloat* value_ptr) {
     glUniform4fv(location, count, value_ptr);
+    PROTO3D_CHECK_GL_ERROR("glUniform4fv");
   }
 };
 
@@ -406,6 +435,7 @@ template<>
 struct UniformVec4SetterFn<GLint> {
   void operator()(GLint location, GLsizei count, const GLint* value_ptr) {
     glUniform4iv(location, count, value_ptr);
+    PROTO3D_CHECK_GL_ERROR("glUniform4iv");
   }
 };
 
@@ -413,6 +443,7 @@ template<>
 struct UniformVec4SetterFn<GLuint> {
   void operator()(GLint location, GLsizei count, const GLuint* value_ptr) {
     glUniform4uiv(location, count, value_ptr);
+    PROTO3D_CHECK_GL_ERROR("glUniform4uiv");
   }
 };
 
@@ -424,76 +455,94 @@ struct UniformVec4SetterFn<GLuint> {
 struct UniformGLMVecSetterFn {
   void operator()(GLint location, const glm::vec2& value) {
     glUniform2fv(location, 1, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniform2fv");
   }
 
   void operator()(GLint location, const glm::vec3& value) {
     glUniform3fv(location, 1, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniform3fv");
   }
 
   void operator()(GLint location, const glm::vec4& value) {
     glUniform4fv(location, 1, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniform4fv");
   }
 
   void operator()(GLint location, const glm::ivec2& value) {
     glUniform2iv(location, 1, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniform2iv");
   }
 
   void operator()(GLint location, const glm::ivec3& value) {
     glUniform2iv(location, 1, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniform2iv");
   }
 
   void operator()(GLint location, const glm::ivec4& value) {
     glUniform2iv(location, 1, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniform2iv");
   }
 
   void operator()(GLint location, const glm::uvec2& value) {
     glUniform2uiv(location, 1, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniform2uiv");
   }
 
   void operator()(GLint location, const glm::uvec3& value) {
     glUniform2uiv(location, 1, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniform2uiv");
   }
 
   void operator()(GLint location, const glm::uvec4& value) {
     glUniform2uiv(location, 1, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniform2uiv");
   }
 };
 
 struct UniformGLMMatSetterFn {
   void operator()(GLint location, GLboolean transpose, const glm::mat2& value) {
     glUniformMatrix2fv(location, 1, transpose, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniformMatrix2fv");
   }
 
   void operator()(GLint location, GLboolean transpose, const glm::mat3& value) {
     glUniformMatrix3fv(location, 1, transpose, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniformMatrix3fv");
   }
 
   void operator()(GLint location, GLboolean transpose, const glm::mat4& value) {
     glUniformMatrix4fv(location, 1, transpose, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniformMatrix4fv");
   }
 
   void operator()(GLint location, GLboolean transpose, const glm::mat2x3& value) {
     glUniformMatrix2x3fv(location, 1, transpose, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniformMatrix2x3fv");
   }
 
   void operator()(GLint location, GLboolean transpose, const glm::mat3x2& value) {
     glUniformMatrix3x2fv(location, 1, transpose, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniformMatrix3x2fv");
   }
 
   void operator()(GLint location, GLboolean transpose, const glm::mat2x4& value) {
     glUniformMatrix2x4fv(location, 1, transpose, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniformMatrix2x4fv");
   }
 
   void operator()(GLint location, GLboolean transpose, const glm::mat4x2& value) {
     glUniformMatrix4x2fv(location, 1, transpose, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniformMatrix4x2fv");
   }
 
   void operator()(GLint location, GLboolean transpose, const glm::mat3x4& value) {
     glUniformMatrix3x4fv(location, 1, transpose, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniformMatrix3x4fv");
   }
 
   void operator()(GLint location, GLboolean transpose, const glm::mat4x3& value) {
     glUniformMatrix4x3fv(location, 1, transpose, glm::value_ptr(value));
+    PROTO3D_CHECK_GL_ERROR("glUniformMatrix4x3fv");
   }
 };
 
@@ -508,6 +557,7 @@ template<typename T>
 struct TexParameterSetterFn {
   void operator()(GLenum target, GLenum pname, T param) {
     glTexParameteri(target, pname, param);
+    PROTO3D_CHECK_GL_ERROR("glTexParameteri");
   }
 };
 
@@ -515,6 +565,7 @@ template<>
 struct TexParameterSetterFn<GLfloat> {
   void operator()(GLenum target, GLenum pname, GLfloat param) {
     glTexParameterf(target, pname, param);
+    PROTO3D_CHECK_GL_ERROR("glTexParameterf");
   }
 };
 
@@ -532,6 +583,7 @@ template<>
 struct VecTexParameterSetterFn<GLint> {
   void operator()(GLenum target, GLenum pname, const GLint* param) {
     glTexParameteriv(target, pname, param);
+    PROTO3D_CHECK_GL_ERROR("glTexParameteriv");
   }
 };
 
@@ -539,6 +591,7 @@ template<>
 struct VecTexParameterSetterFn<GLfloat> {
   void operator()(GLenum target, GLenum pname, const GLfloat* param) {
     glTexParameterfv(target, pname, param);
+    PROTO3D_CHECK_GL_ERROR("glTexParameterfv");
   }
 };
 
@@ -546,6 +599,7 @@ template<>
 struct VecTexParameterSetterFn<GLint, GLint> {
   void operator()(GLenum target, GLenum pname, const GLint* param) {
     glTexParameterIiv(target, pname, param);
+    PROTO3D_CHECK_GL_ERROR("glTexParameterIiv");
   }
 };
 
@@ -553,6 +607,7 @@ template<>
 struct VecTexParameterSetterFn<GLuint, GLuint> {
   void operator()(GLenum target, GLenum pname, const GLuint* param) {
     glTexParameterIuiv(target, pname, param);
+    PROTO3D_CHECK_GL_ERROR("glTexParameterIuiv");
   }
 };
 // }}} END of Texture (detail)
@@ -582,27 +637,33 @@ class VAO {
 
   void Create() {
     glGenVertexArrays(1, &id);
+    PROTO3D_CHECK_GL_ERROR("glGenVertexArrays");
   }
 
   void Delete() {
     glDeleteVertexArrays(1, &id);
+    PROTO3D_CHECK_GL_ERROR("glDeleteVertexArrays");
   }
 
   void Bind() const {
     glBindVertexArray(id);
+    PROTO3D_CHECK_GL_ERROR("glBindVertexArray");
   }
 
   void Unbind() const {
     glBindVertexArray(0);
+    PROTO3D_CHECK_GL_ERROR("glBindVertexArray");
   }
 };
 
 void Create(VAO *vao_arr, GLuint count) {
   glGenVertexArrays(count, reinterpret_cast<GLuint *>(vao_arr));
+  PROTO3D_CHECK_GL_ERROR("glGenVertexArrays");
 }
 
 void Delete(VAO *vao_arr, GLuint count) {
   glDeleteVertexArrays(count, reinterpret_cast<GLuint *>(vao_arr));
+  PROTO3D_CHECK_GL_ERROR("glDeleteVertexArrays");
 }
 
 /// OpenGL Vertex Buffer Objects
@@ -616,35 +677,43 @@ class VBO {
 
   void Create() {
     glGenBuffers(1, &id);
+    PROTO3D_CHECK_GL_ERROR("glGenBuffers");
   }
 
   void Delete() {
     glDeleteBuffers(1, &id);
+    PROTO3D_CHECK_GL_ERROR("glDeleteBuffers");
   }
 
   void Bind(GLenum target) const {
     glBindBuffer(target, id);
+    PROTO3D_CHECK_GL_ERROR("glBindBuffer");
   }
 
   void Unbind(GLenum target) {
     glBindBuffer(target, 0);
+    PROTO3D_CHECK_GL_ERROR("glBindBuffer");
   }
 
   void Bind() const {
     glBindBuffer(GL_ARRAY_BUFFER, id);
+    PROTO3D_CHECK_GL_ERROR("glBindBuffer");
   }
 
   void Unbind() const {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    PROTO3D_CHECK_GL_ERROR("glBindBuffer");
   }
 };
 
 void Create(VBO *vbo_arr, GLuint count) {
   glGenBuffers(count, reinterpret_cast<GLuint *>(vbo_arr));
+  PROTO3D_CHECK_GL_ERROR("glGenBuffers");
 }
 
 void Delete(VBO *vbo_arr, GLuint count) {
   glDeleteBuffers(count, reinterpret_cast<GLuint *>(vbo_arr));
+  PROTO3D_CHECK_GL_ERROR("glDeleteBuffers");
 }
 // }}} END of OpenGL objects
 
@@ -684,6 +753,7 @@ class Shader {
   ///                    GL_GEOMETRY_SHADER or GL_FRAGMENT_SHADER.
   void Create(GLenum shader_type) {
     id = glCreateShader(shader_type);
+    PROTO3D_CHECK_GL_ERROR("glCreateShader");
   }
 
   void Delete() {
@@ -694,16 +764,19 @@ class Shader {
     // Program::Link(shaders...) attaches, links, and then detaches the shaders.
     // It's recommended that you Delete(shaders...) after linking.
     glDeleteShader(id);
+    PROTO3D_CHECK_GL_ERROR("glDeleteShader");
   }
 
   void SetSource(const char *source) {
     glShaderSource(id, 1, &source, nullptr);
+    PROTO3D_CHECK_GL_ERROR("glShaderSource");
   }
 
   /// @return nullptr if success or the compilation error message in case of
   /// failure
   std::unique_ptr<char> Compile() {
     glCompileShader(id);
+    PROTO3D_CHECK_GL_ERROR("glCompileShader");
     if (IsCompiled()) {
       return nullptr;
     }
@@ -718,12 +791,14 @@ class Shader {
     // information log.
     GLint size;
     glGetShaderiv(id, GL_INFO_LOG_LENGTH, &size);
+    PROTO3D_CHECK_GL_ERROR("glGetShaderiv");
 
     if (size == 0) {
       return nullptr;
     }
     info_log = new char[size + 1];
     glGetShaderInfoLog(id, size, length_ptr, info_log);
+    PROTO3D_CHECK_GL_ERROR("glGetShaderInfoLog");
 
     return std::unique_ptr<char>(info_log);
   }
@@ -736,12 +811,14 @@ class Shader {
     // The size includes the 0 terminating character.
     GLint size;
     glGetShaderiv(id, GL_SHADER_SOURCE_LENGTH, &size);
+    PROTO3D_CHECK_GL_ERROR("glGetShaderiv");
 
     if (size == 0) {
       return nullptr;
     }
     source = new char[size + 1];
     glGetShaderSource(id, size, length_ptr, source);
+    PROTO3D_CHECK_GL_ERROR("glGetShaderSource");
 
     return std::unique_ptr<char>(source);
   }
@@ -749,6 +826,7 @@ class Shader {
   GLenum GetType() {
     GLint type;
     glGetShaderiv(id, GL_SHADER_TYPE, &type);
+    PROTO3D_CHECK_GL_ERROR("glGetShaderiv");
     return type;
   }
 
@@ -756,12 +834,14 @@ class Shader {
   bool IsDeleted() {
     GLint deleted;
     glGetShaderiv(id, GL_DELETE_STATUS, &deleted);
+    PROTO3D_CHECK_GL_ERROR("glGetShaderiv");
     return deleted == GL_TRUE;
   }
 
   bool IsCompiled() {
     GLint compiled;
     glGetShaderiv(id, GL_COMPILE_STATUS, &compiled);
+    PROTO3D_CHECK_GL_ERROR("glGetShaderiv");
     return compiled == GL_TRUE;
   }
 };
@@ -777,20 +857,24 @@ class Program {
 
   void Create() {
     id = glCreateProgram();
+    PROTO3D_CHECK_GL_ERROR("glCreateProgram");
   }
 
   void Delete() {
     glDeleteProgram(id);
+    PROTO3D_CHECK_GL_ERROR("glDeleteProgram");
   }
 
   void AttachShaders(Shader shader) {
     glAttachShader(id, shader.id);
+    PROTO3D_CHECK_GL_ERROR("glAttachShader");
   }
 
   /// Attach shaders to this program.
   template<class Shader, class... Shaders>
   void AttachShaders(Shader shader, Shaders... shaders) {
     glAttachShader(id, shader.id);
+    PROTO3D_CHECK_GL_ERROR("glAttachShader");
     AttachShaders(shaders...);
   }
 
@@ -802,12 +886,14 @@ class Program {
 
   void DetachShaders(Shader shader) {
     glDetachShader(id, shader.id);
+    PROTO3D_CHECK_GL_ERROR("glDetachShader");
   }
 
   /// Detach shaders from this program.
   template<class... Shaders>
   void DetachShaders(Shader shader, Shaders... shaders) {
     glDetachShader(id, shader.id);
+    PROTO3D_CHECK_GL_ERROR("glDetachShader");
     DetachShaders(shaders...);
   }
 
@@ -820,6 +906,7 @@ class Program {
   /// Link all the attached shaders to finish building the program.
   std::unique_ptr<char> Link() {
     glLinkProgram(id);
+    PROTO3D_CHECK_GL_ERROR("glLinkProgram");
     if (IsLinked()) {
       return nullptr;
     }
@@ -849,22 +936,26 @@ class Program {
     // information log.
     GLint size;
     glGetProgramiv(id, GL_INFO_LOG_LENGTH, &size);
+    PROTO3D_CHECK_GL_ERROR("glGetProgramiv");
 
     if (size == 0) {
       return nullptr;
     }
     info_log = new char[size + 1];
     glGetProgramInfoLog(id, size, length_p, info_log);
+    PROTO3D_CHECK_GL_ERROR("glGetProgramInfoLog");
     return std::unique_ptr<char>(info_log);
   }
 
   std::unique_ptr<char> ValidationLog(bool *is_valid, GLsizei *length_ptr = nullptr) {
     // Validate the program
     glValidateProgram(id);
+    PROTO3D_CHECK_GL_ERROR("glValidateProgram");
 
     // Query the validation status
     GLint is_valid_i;
     glGetProgramiv(id, GL_VALIDATE_STATUS, &is_valid_i);
+    PROTO3D_CHECK_GL_ERROR("glGetProgramiv");
     *is_valid = is_valid_i;
 
     // Return the info log that contains validation information
@@ -873,12 +964,14 @@ class Program {
 
   std::unique_ptr<Shader> GetAttachedShaders(GLint *count_ptr) {
     glGetProgramiv(id, GL_ATTACHED_SHADERS, count_ptr);
+    PROTO3D_CHECK_GL_ERROR("glGetProgramiv");
     if (*count_ptr == 0) {
       return nullptr;
     }
 
     auto shaders = new GLuint[*count_ptr];
     glGetAttachedShaders(id, *count_ptr, count_ptr, shaders);
+    PROTO3D_CHECK_GL_ERROR("glGetAttachedShaders");
 
     return std::unique_ptr<Shader>(reinterpret_cast<Shader *>(shaders));
   }
@@ -886,25 +979,30 @@ class Program {
   bool IsLinked() {
     GLint linked;
     glGetProgramiv(id, GL_LINK_STATUS, &linked);
+    PROTO3D_CHECK_GL_ERROR("glGetProgramiv");
     return linked == GL_TRUE;
   }
 
   bool IsDeleted() {
     GLint deleted;
     glGetProgramiv(id, GL_DELETE_STATUS, &deleted);
+    PROTO3D_CHECK_GL_ERROR("glGetProgramiv");
     return deleted == GL_TRUE;
   }
 
   void Use() const {
     glUseProgram(id);
+    PROTO3D_CHECK_GL_ERROR("glUseProgram");
   }
 
   void Bind() const {
     glUseProgram(id);
+    PROTO3D_CHECK_GL_ERROR("glUseProgram");
   }
 
   void Unbind() const {
     glUseProgram(0);
+    PROTO3D_CHECK_GL_ERROR("glUseProgram");
   }
 
   /// Get the location of an attribute variable.
@@ -912,7 +1010,9 @@ class Program {
   /// Attribute variables can have a different value for each vertex (e.g. the
   /// color of a corner of a triangle).
   GLint AttribLocation(const GLchar* attrib_name) const {
-    return glGetAttribLocation(id, attrib_name);
+    GLint location = glGetAttribLocation(id, attrib_name);
+    PROTO3D_CHECK_GL_ERROR("glGetAttribLocation");
+    return location;
   }
 
   /// Get the location of an uniform variable.
@@ -920,7 +1020,9 @@ class Program {
   /// Uniform variables keep the same value for multiple vertices (e.g. the
   /// color of the whole triangle).
   GLint UniformLocation(const GLchar* uniform_name) const {
-    return glGetUniformLocation(id, uniform_name);
+    GLint location = glGetUniformLocation(id, uniform_name);
+    PROTO3D_CHECK_GL_ERROR("glGetUniformLocation");
+    return location;
   }
 
   // Uniform setters using locations {{{
@@ -961,6 +1063,7 @@ class Program {
 #define UNIFORM_MATRIX_SETTER(DIMENSIONS) \
   void SetUniformMat ## DIMENSIONS(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value_ptr) { \
     glUniformMatrix ## DIMENSIONS ## fv(location, count, transpose, value_ptr); \
+    PROTO3D_CHECK_GL_ERROR("glUniformMatrix"); \
   }
 
   UNIFORM_MATRIX_SETTER(2)
@@ -1106,10 +1209,12 @@ class Texture {
 
   void Gen() {
     glGenTextures(1, &id);
+    PROTO3D_CHECK_GL_ERROR("glGenTextures");
   }
 
   void Delete() {
     glDeleteTextures(1, &id);
+    PROTO3D_CHECK_GL_ERROR("glDeleteTextures");
   }
 };
 
@@ -1123,15 +1228,18 @@ class TextureCommonTemplate : public Texture {
 
   void Bind() const {
     glBindTexture(kTarget, id);
+    PROTO3D_CHECK_GL_ERROR("glBindTexture");
   }
 
   void Unbind() const {
     glBindTexture(kTarget, 0);
+    PROTO3D_CHECK_GL_ERROR("glBindTexture");
   }
 
   bool Bound() {
     GLint current_texture;
     glGetIntegerv(kBinding, &current_texture);
+    PROTO3D_CHECK_GL_ERROR("glGetIntegerv");
     return this->id && this->id == (GLuint)current_texture;
   }
 
@@ -1179,8 +1287,10 @@ class Texture2D : public detail::TextureCommonTemplate<GL_TEXTURE_2D, GL_TEXTURE
     assert(Bound());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+    PROTO3D_CHECK_GL_ERROR("glTexParameteri");
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
+    PROTO3D_CHECK_GL_ERROR("glTexParameteri");
   }
 
   void GenerateMipmaps() {
@@ -1229,6 +1339,7 @@ class Texture2D : public detail::TextureCommonTemplate<GL_TEXTURE_2D, GL_TEXTURE
         format,  // format
         GL_UNSIGNED_BYTE,  // color component datatype
         pixels);
+    PROTO3D_CHECK_GL_ERROR("glTexImage2D");
   }
 #endif  // PROTO3D_USE_STB
 };
@@ -1246,10 +1357,12 @@ class Textures {
 
   void Gen() {
     glGenTextures(size, ids);
+    PROTO3D_CHECK_GL_ERROR("glGenTextures");
   }
 
   void Delete() {
     glDeleteTextures(size, ids);
+    PROTO3D_CHECK_GL_ERROR("glDeleteTextures");
   }
 };
 
@@ -1261,6 +1374,7 @@ class Textures2D : public Textures {
 
   void Unbind() const {
     glBindTexture(GL_TEXTURE_2D, 0);
+    PROTO3D_CHECK_GL_ERROR("glBindTexture");
   }
 
   Texture2D operator[](GLsizei i) const {
@@ -1293,24 +1407,36 @@ void proto3d_DebugMessageCallbackImpl(
 
   char *source_str;
   switch (source) {
+#ifdef GL_DEBUG_SOURCE_API
     case GL_DEBUG_SOURCE_API:
       source_str = "GL_DEBUG_SOURCE_API";
       break;
+#endif
+#ifdef GL_DEBUG_SOURCE_WINDOW_SYSTEM
     case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
       source_str = "GL_DEBUG_SOURCE_WINDOW_SYSTEM";
       break;
+#endif
+#ifdef GL_DEBUG_SOURCE_SHADER_COMPILER
     case GL_DEBUG_SOURCE_SHADER_COMPILER:
       source_str = "GL_DEBUG_SOURCE_SHADER_COMPILER";
       break;
+#endif
+#ifdef GL_DEBUG_SOURCE_THIRD_PARTY
     case GL_DEBUG_SOURCE_THIRD_PARTY:
       source_str = "GL_DEBUG_SOURCE_THIRD_PARTY";
       break;
+#endif
+#ifdef GL_DEBUG_SOURCE_APPLICATION
     case GL_DEBUG_SOURCE_APPLICATION:
       source_str = "GL_DEBUG_SOURCE_APPLICATION";
       break;
+#endif
+#ifdef GL_DEBUG_SOURCE_OTHER
     case GL_DEBUG_SOURCE_OTHER:
       source_str = "GL_DEBUG_SOURCE_OTHER";
       break;
+#endif
     default:
       source_str = "unknown GL_DEBUG_SOURCE";
       break;
@@ -1319,35 +1445,51 @@ void proto3d_DebugMessageCallbackImpl(
 
   char *type_str;
   switch (type) {
+#ifdef GL_DEBUG_TYPE_ERROR
     case GL_DEBUG_TYPE_ERROR:
       type_str = "GL_DEBUG_TYPE_ERROR";
       break;
+#endif
+#ifdef GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR
     case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
       type_str = "GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR";
       break;
+#endif
+#ifdef GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR
     case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
       type_str = "GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR";
       break;
+#endif
+#ifdef GL_DEBUG_TYPE_PORTABILITY
     case GL_DEBUG_TYPE_PORTABILITY:
       type_str = "GL_DEBUG_TYPE_PORTABILITY";
       break;
+#endif
+#ifdef GL_DEBUG_TYPE_PERFORMANCE
     case GL_DEBUG_TYPE_PERFORMANCE:
       type_str = "GL_DEBUG_TYPE_PERFORMANCE";
       break;
-#ifdef PROTO3D_USE_GL_VERSION_4_3
+#endif
+#ifdef GL_DEBUG_TYPE_MARKER
     case GL_DEBUG_TYPE_MARKER:
       type_str = "GL_DEBUG_TYPE_MARKER";
       break;
+#endif
+#ifdef GL_DEBUG_TYPE_PUSH_GROUP
     case GL_DEBUG_TYPE_PUSH_GROUP:
       type_str = "GL_DEBUG_TYPE_PUSH_GROUP";
       break;
+#endif
+#ifdef GL_DEBUG_TYPE_POP_GROUP
     case GL_DEBUG_TYPE_POP_GROUP:
       type_str = "GL_DEBUG_TYPE_POP_GROUP";
       break;
 #endif
+#ifdef GL_DEBUG_TYPE_OTHER
     case GL_DEBUG_TYPE_OTHER:
       type_str = "GL_DEBUG_TYPE_OTHER";
       break;
+#endif
     default:
       type_str = "unknown GL_DEBUG_TYPE";
   }
@@ -1358,16 +1500,22 @@ void proto3d_DebugMessageCallbackImpl(
 
   char *severity_str;
   switch (severity) {
+#ifdef GL_DEBUG_SEVERITY_LOW
     case GL_DEBUG_SEVERITY_LOW:
       severity_str = "GL_DEBUG_SEVERITY_LOW";
       break;
+#endif
+#ifdef GL_DEBUG_SEVERITY_MEDIUM
     case GL_DEBUG_SEVERITY_MEDIUM:
       severity_str = "GL_DEBUG_SEVERITY_MEDIUM";
       break;
+#endif
+#ifdef GL_DEBUG_SEVERITY_HIGH
     case GL_DEBUG_SEVERITY_HIGH :
       severity_str = "GL_DEBUG_SEVERITY_HIGH ";
       break;
-#ifdef PROTO3D_USE_GL_VERSION_4_3
+#endif
+#ifdef GL_DEBUG_SEVERITY_NOTIFICATION
     case GL_DEBUG_SEVERITY_NOTIFICATION:
       severity_str = "GL_DEBUG_SEVERITY_NOTIFICATION";
       break;
@@ -1384,8 +1532,8 @@ void proto3d_DebugMessageCallbackImpl(
 void proto3d::gl::ReportAllErrorsViaCallback(const char *origin) {
   // Set the callback
   glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+  PROTO3D_CHECK_GL_ERROR("glEnable");
   glDebugMessageCallback(&proto3d_DebugMessageCallbackImpl, nullptr);
-  PROTO3D_CHECK_GL_ERROR("glDebugMessageCallback");
 
   // Enable all messages
   glDebugMessageControl(
@@ -1414,6 +1562,8 @@ const char *LastErrorString() {
     case GL_INVALID_FRAMEBUFFER_OPERATION:
       return "GL_INVALID_FRAMEBUFFER_OPERATION";
     case GL_OUT_OF_MEMORY: return "GL_OUT_OF_MEMORY";
+    case GL_STACK_UNDERFLOW: return "GL_STACK_UNDERFLOW";
+    case GL_STACK_OVERFLOW: return "GL_STACK_OVERFLOW";
     default: return "unknown error type";
   }
 }
@@ -1444,7 +1594,7 @@ const char *FramebufferStatusString() {
 ///
 /// Idea and implementation by @rygorous.
 void CheckLeaks() {
-  // Let's assume that aren't names > 10000
+  // Let's assume names > 10000 do not exist
   GLuint max_id = 10000;
 
   // If brute force doesn't work, you're not applying it hard enough
@@ -1465,6 +1615,7 @@ void CheckLeaks() {
 #undef CHECK_GL_LEAK
   }
   PROTO3D_TRACE("OpenGL: leak check done.\n");
+  glGetError();  // Reset GL error flag
 }
 
 }  // namespace gl
