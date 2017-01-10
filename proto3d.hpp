@@ -23,7 +23,7 @@
 stbi_uc* stbi_load(const char*, int*, int*, int*, int);
 #endif
 
-// proto3d macros {{{
+// proto3d general compiler support macros {{{
 // A macro to disallow the copy constructor and operator= functions
 #define PROTO3D_DISALLOW_COPY_AND_ASSIGN(TypeName) \
   TypeName(const TypeName&) = delete;      \
@@ -134,6 +134,7 @@ stbi_uc* stbi_load(const char*, int*, int*, int*, int);
 #ifndef FATTR_NONNULL_RET
   #define FATTR_NONNULL_RET
 #endif
+// }}}
 
 // Macro for logging that takes printf-style arguments.
 // This version requires <cstdio>, but it can be defined differently before
@@ -142,7 +143,6 @@ stbi_uc* stbi_load(const char*, int*, int*, int*, int);
 # include <cstdio>  // NOLINT
 # define PROTO3D_TRACE(...) fprintf(stderr, __VA_ARGS__); fflush(stderr)
 #endif
-// }}} END of Macros
 
 #ifndef PROTO3D_CHECK_GL_ERROR
 # ifdef NDEBUG
@@ -656,6 +656,10 @@ class VAO {
   }
 };
 
+void Create(VAO *vao_arr, GLuint count);
+void Delete(VAO *vao_arr, GLuint count);
+
+#ifdef PROTO3D_IMPLEMENTATION
 void Create(VAO *vao_arr, GLuint count) {
   glGenVertexArrays(count, reinterpret_cast<GLuint *>(vao_arr));
   PROTO3D_CHECK_GL_ERROR("glGenVertexArrays");
@@ -665,6 +669,7 @@ void Delete(VAO *vao_arr, GLuint count) {
   glDeleteVertexArrays(count, reinterpret_cast<GLuint *>(vao_arr));
   PROTO3D_CHECK_GL_ERROR("glDeleteVertexArrays");
 }
+#endif  // PROTO3D_IMPLEMENTATION
 
 /// OpenGL Vertex Buffer Objects
 class VBO {
@@ -706,6 +711,10 @@ class VBO {
   }
 };
 
+void Create(VBO *vbo_arr, GLuint count);
+void Delete(VBO *vbo_arr, GLuint count);
+
+#ifdef PROTO3D_IMPLEMENTATION
 void Create(VBO *vbo_arr, GLuint count) {
   glGenBuffers(count, reinterpret_cast<GLuint *>(vbo_arr));
   PROTO3D_CHECK_GL_ERROR("glGenBuffers");
@@ -715,6 +724,7 @@ void Delete(VBO *vbo_arr, GLuint count) {
   glDeleteBuffers(count, reinterpret_cast<GLuint *>(vbo_arr));
   PROTO3D_CHECK_GL_ERROR("glDeleteBuffers");
 }
+#endif  // PROTO3D_IMPLEMENTATION
 // }}} END of OpenGL objects
 
 // OpenGL Shaders {{{
@@ -1386,6 +1396,18 @@ class Textures2D : public Textures {
   }
 };
 // }}} END of OpenGL Textures
+
+namespace shader {
+// Shader Facade {{{
+#ifdef PROTO3D_USE_EXCEPTIONS
+Shader Compile(GLenum shader_type, const char *source);
+template<class... Shaders> Program Link(Shaders... shaders);
+Program Link(proto3d::gl::Shader *shaders, int size);
+Program CompileAndLink(GLenum shader_type, const char *source);
+#endif
+// }}} END of Facade
+}  // namespace shader
+
 }  // namespace gl
 
 }  // namespace proto3d
@@ -1624,7 +1646,6 @@ void CheckLeaks() {
 
 // }}} END of OpenGL debugging utilities implementation
 
-// Facade {{{
 namespace proto3d {
 
 namespace gl {
@@ -1632,6 +1653,7 @@ namespace gl {
 namespace shader {
 
 #ifdef PROTO3D_USE_EXCEPTIONS
+// Shader Facade Implementation {{{
 
 /// Compile shader source code and return a Shader.
 ///
@@ -1694,7 +1716,7 @@ proto3d::gl::Program CompileAndLink(GLenum shader_type, const char *source) {
   }
   return program;
 }
-
+// }}} END of Shader Facade Implementation
 #endif  // PROTO3D_USE_EXCEPTIONS
 
 }  // namespace shader
@@ -1702,7 +1724,6 @@ proto3d::gl::Program CompileAndLink(GLenum shader_type, const char *source) {
 }  // namespace gl
 
 }  // namespace proto3d
-// }}} END of Facade
 #endif  // PROTO3D_IMPLEMENTATION
 
 #endif  // PROTO3D_H_
