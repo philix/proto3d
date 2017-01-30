@@ -782,6 +782,11 @@ class Shader {
     PROTO3D_CHECK_GL_ERROR("glShaderSource");
   }
 
+  void SetSources(GLsizei count, const char **sources) {
+    glShaderSource(id, count, sources, nullptr);
+    PROTO3D_CHECK_GL_ERROR("glShaderSource");
+  }
+
   /// @return nullptr if success or the compilation error message in case of
   /// failure
   std::unique_ptr<char> Compile() {
@@ -1664,6 +1669,17 @@ proto3d::gl::Shader Compile(GLenum shader_type, const char *source) {
   proto3d::gl::Shader shader;
   shader.Create(shader_type);
   shader.SetSource(source);
+  auto message = shader.Compile();
+  if (message != nullptr) {
+    throw std::runtime_error(std::string(message.get()));
+  }
+  return shader;
+}
+
+proto3d::gl::Shader Compile(GLenum shader_type, GLsizei count, const char **sources) {
+  proto3d::gl::Shader shader;
+  shader.Create(shader_type);
+  shader.SetSources(count, sources);
   auto message = shader.Compile();
   if (message != nullptr) {
     throw std::runtime_error(std::string(message.get()));

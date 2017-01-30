@@ -207,18 +207,15 @@ int main(int argc, char *argv[]) {
 
   // Compile shaders
   char shader_source[4096];
-  string vertex_shader_path = base_relative_path + "/vertex1.vert";
-  string fragment_shader_path = base_relative_path + "/fragment1.frag";
-  if (ReadShaderSource(vertex_shader_path.c_str(), shader_source, 4096) < 0) {
+  string shader_path = base_relative_path + "/shaders.glsl";
+  if (ReadShaderSource(shader_path.c_str(), shader_source, 4096) < 0) {
     perror("ReadShaderSource");
     return 3;
   }
-  shaders[0] = shader::Compile(GL_VERTEX_SHADER, shader_source);
-  if (ReadShaderSource(fragment_shader_path.c_str(), shader_source, 4096) < 0) {
-    perror("ReadShaderSource");
-    return 4;
-  }
-  shaders[1] = shader::Compile(GL_FRAGMENT_SHADER, shader_source);
+  const char *sources_vert[] = { "#version 330\n#define VERTEX_SHADER\n", shader_source};
+  shaders[0] = shader::Compile(GL_VERTEX_SHADER, 2, (const char **)sources_vert);
+  const char *sources_frag[] = { "#version 330\n#define FRAGMENT_SHADER\n", shader_source};
+  shaders[1] = shader::Compile(GL_FRAGMENT_SHADER, 2, (const char **)sources_frag);
 
   // Link into a Program
   //
