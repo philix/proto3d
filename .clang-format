@@ -1,0 +1,23 @@
+---
+BasedOnStyle: Google
+---
+Language: Cpp
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+BinPackArguments: false
+BinPackParameters: false
+ColumnLimit: 100
+AlignConsecutiveAssignments: true
+---
+Language: ObjC
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+BinPackArguments: false
+BinPackParameters: false
+ColumnLimit: 100
+---
+Language: JavaScript
+ColumnLimit: 120
+---
+Language: Proto
+...

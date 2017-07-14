@@ -4,10 +4,11 @@
 /// And contains the headers and implementation of common gui functions that
 /// work in any platform. COMMON_GUI_IMPLEMENTATION should be defined before
 /// including to enable the implementation code.
-#include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 
+// clang-format off
 // Platform-specific headers {{{
 #ifdef __APPLE__
 # if defined(__OBJC__)
@@ -20,6 +21,7 @@ typedef void *id;
 # endif
 #endif
 // }}}
+// clang-format on
 
 // Cursor enums {{{
 typedef enum {
@@ -37,11 +39,7 @@ typedef enum {
   kStickyMouseButtonsMode,
 } GWindowInputMode;
 
-typedef enum {
-  kCursorNormal,
-  kCursorHidden,
-  kCursorDisabled
-} GCursorMode;
+typedef enum { kCursorNormal, kCursorHidden, kCursorDisabled } GCursorMode;
 // }}}
 
 // Keyboard enums {{{
@@ -63,6 +61,7 @@ typedef enum {
 //  - For non-printable keys, custom names are used (e.g. "F4",
 //    "BACKSPACE", etc.)
 
+// clang-format off
 typedef enum {
   GUI_KEY_STICK              = -2,
   // The unknown key
@@ -194,13 +193,9 @@ typedef enum {
   GUI_KEY_LAST               = GUI_KEY_MENU,
 } GKey;
 
-typedef enum {
-  kModShift =   0x1,
-  kModControl = 0x2,
-  kModAlt =     0x4,
-  kModSuper =   0x8
-} GModifierKey;
+typedef enum { kModShift = 0x1, kModControl = 0x2, kModAlt = 0x4, kModSuper = 0x8 } GModifierKey;
 // }}}
+// clang-format on
 
 #ifdef __cplusplus
 extern "C" {
@@ -233,20 +228,21 @@ struct window_ns_s {
   double warp_delta_y;
 };
 
+// clang-format off
 // Cocoa-specific global data
 struct global_ns_s {
-    CGEventSourceRef    event_source;
-    id                  delegate;
-    id                  auto_release_pool;
-    id                  cursor;
-    TISInputSourceRef   input_source;
-    id                  unicode_data;
+  CGEventSourceRef    event_source;
+  id                  delegate;
+  id                  auto_release_pool;
+  id                  cursor;
+  TISInputSourceRef   input_source;
+  id                  unicode_data;
 
-    char                key_name[64];
-    short int           public_keys[256];
-    short int           native_keys[GUI_KEY_LAST + 1];
+  char                key_name[64];
+  short int           public_keys[256];
+  short int           native_keys[GUI_KEY_LAST + 1];
 
-    char               *clipboard_string;
+  char               *clipboard_string;
 };
 
 // Cocoa-specific per-monitor data
@@ -255,6 +251,7 @@ struct monitor_ns_s {
   CGDisplayModeRef  previous_mode;
   uint32_t          unit_number;
 };
+// clang-format on
 
 // Cocoa-specific per-cursor data
 struct cursor_ns_s {
@@ -268,6 +265,7 @@ struct global_ns_time_s {
 #endif  // __APPLE__
 // }}}
 
+// clang-format off
 // Configuration structs {{{
 // OpenGL context configuration.
 //
@@ -327,6 +325,7 @@ typedef struct GFramebufferConfig {
   // ...
 } GFramebufferConfig;
 // }}}
+// clang-format on
 
 // Miscellaneous structs (GL context, GVideoMode...) {{{
 // GUI OpenGL context
@@ -337,12 +336,12 @@ typedef struct {
 } GContext;
 
 typedef struct {
-    int width;         // The width, in screen coordinates
-    int height;        // The height, in screen coordinates
-    int red_bits;      // The bit depth of the red channel
-    int green_bits;    // The bit depth of the green channel
-    int blue_bits;     // The bit depth of the blue channel
-    int refresh_rate;  // The refresh rate, in Hz
+  int width;         // The width, in screen coordinates
+  int height;        // The height, in screen coordinates
+  int red_bits;      // The bit depth of the red channel
+  int green_bits;    // The bit depth of the green channel
+  int blue_bits;     // The bit depth of the blue channel
+  int refresh_rate;  // The refresh rate, in Hz
 } GVideoMode;
 
 // Gamma ramp.
@@ -370,7 +369,7 @@ typedef struct GImage {
 // Mouse struct and enums {{{
 struct GCursor;
 typedef struct GCursor {
-  struct GCursor     *next;
+  struct GCursor *next;
 #ifdef __APPLE__
   struct cursor_ns_s ns;
 #endif
@@ -383,6 +382,7 @@ typedef enum {
   kRepeat    // The key was held down until it repeated
 } GInputAction;
 
+// clang-format off
 // Mouse buttons
 typedef enum {
   kMouseButton1      = 0,
@@ -400,13 +400,14 @@ typedef enum {
 
   kMouseButtonStick = 9,
 } GMouseButton;
+// clang-format on
 
 // Mouse actions
 typedef enum {
   kMouseActionClick,
   // TODO: more mouse actions
 } GMouseAction;
-// }}} 
+// }}}
 
 struct GlobalGui;
 
@@ -455,7 +456,7 @@ typedef union {
   struct {
     GMouseButton button;
     GMouseAction action;
-    int            mods;
+    int mods;
   } mouse;
   struct {
     // kWindowCursorMotion
@@ -490,9 +491,9 @@ typedef union {
 } GWindowEventData;
 
 typedef struct {
-  GWindowEventType  type;
-  struct GWindow   *window;  // The window that was moved, resized...
-  GWindowEventData  e;
+  GWindowEventType type;
+  struct GWindow *window;  // The window that was moved, resized...
+  GWindowEventData e;
 
   /*
     GLFWwindowrefreshfun    refresh;
@@ -518,6 +519,7 @@ typedef struct GMonitorEvent {
   GMonitorEventType type;
 } GMonitorEvent;
 
+// clang-format off
 // Parameters relating to the creation of the window but not directly related
 // to the framebuffer. This is used to pass window creation parameters from
 // shared code to the platform API.
@@ -654,7 +656,8 @@ struct GlobalGui {
 #endif
 };
 typedef struct GlobalGui GlobalGui;
-// }}} 
+// }}}
+// clang-format on
 
 typedef void (*GL_Proc)(void);
 
@@ -686,9 +689,7 @@ int gui_platform_create_window(GWindow *window,
                                char **error);
 void gui_platform_destroy_window(GWindow *window);
 void gui_set_window_title(GWindow *window, const char *title);
-void gui_set_window_icon(GWindow *window,
-                         int count,
-                         const GImage *images);
+void gui_set_window_icon(GWindow *window, int count, const GImage *images);
 void gui_get_window_pos(GWindow *window, int *x, int *y);
 void gui_set_window_pos(GWindow *window, int x, int y);
 void gui_platform_get_window_size(GWindow *window, int *width, int *height);
@@ -702,11 +703,7 @@ void gui_set_window_size_limits(GWindow *window,
 void gui_set_window_aspect_ratio(GWindow *window, int numer, int denom);
 #endif
 void gui_get_framebuffer_size(GWindow *window, int *width, int *height);
-void gui_get_window_framesize(GWindow *window,
-                              int *left,
-                              int *top,
-                              int *right,
-                              int *bottom);
+void gui_get_window_framesize(GWindow *window, int *left, int *top, int *right, int *bottom);
 void gui_iconify_window(GWindow *window);
 void gui_restore_window(GWindow *window);
 void gui_maximize_window(GWindow *window);
@@ -734,13 +731,8 @@ const char *gui_get_key_name(GlobalGui *gui, int key, int scancode);
 void gui_platform_get_cursor_pos(GWindow *window, double *xpos, double *ypos);
 void gui_platform_set_cursor_pos(GWindow *window, double x, double y);
 void gui_platform_set_cursor_mode(GWindow *window, GCursorMode mode);
-bool gui_platform_create_cursor(GCursor *cursor,
-                                const GImage *image,
-                                int xhot,
-                                int yhot);
-int gui_platform_create_standard_cursor(GCursor *cursor,
-                                        GCursorShape shape,
-                                        char **error);
+bool gui_platform_create_cursor(GCursor *cursor, const GImage *image, int xhot, int yhot);
+int gui_platform_create_standard_cursor(GCursor *cursor, GCursorShape shape, char **error);
 void gui_platform_destroy_cursor(GCursor *cursor);
 void gui_platform_set_cursor(GWindow *window, GCursor *cursor);
 // -> clipboard
@@ -752,8 +744,8 @@ const char *gui_get_clipboard_string(GWindow *window, char **error);
 void gui_init_timer_ns(GlobalGui *gui);
 uint64_t gui_get_timer_value(GlobalGui *gui);
 uint64_t gui_get_timer_frequency(GlobalGui *gui);
-// }}} 
-// }}} 
+// }}}
+// }}}
 
 // Gui abstract API {{{
 bool gui_init(GlobalGui *gui, char **error);
@@ -766,8 +758,7 @@ void free_monitor(GMonitor *monitor);
 void alloc_gamma_arrays(GGammaRamp *ramp, uint32_t size);
 void free_gamma_arrays(GGammaRamp *ramp);
 void free_monitors(GMonitor **monitors, int count);
-const GVideoMode *gui_choose_video_mode(GMonitor *monitor,
-                                        const GVideoMode *desired);
+const GVideoMode *gui_choose_video_mode(GMonitor *monitor, const GVideoMode *desired);
 int gui_compare_video_modes(const GVideoMode *fm, const GVideoMode *sm);
 void gui_split_bpp(int bpp, int *red, int *green, int *blue);
 // }}}
@@ -788,7 +779,7 @@ void gui_set_gamma_ramp(GMonitor *monitor, const GGammaRamp *ramp);
 
 // Internal input abstract API {{{
 bool gui_is_printable(GKey key);
-// }}} 
+// }}}
 
 // Public event abstract API {{{
 void gui_input_key(GWindow *window, GKey key, int scancode, int action, int mods);
@@ -807,15 +798,11 @@ void gui_input_framebuffer_size(GWindow *window, int width, int height);
 void gui_input_window_damage(GWindow *window);
 void gui_input_window_close_request(GWindow *window);
 void gui_input_window_monitor_change(GWindow *window, GMonitor *monitor);
-// }}} 
+// }}}
 
 // Public window manipulation abstract API {{{
-GWindow *gui_create_window(GlobalGui *gui,
-                           int width,
-                           int height,
-                           const char *title,
-                           GMonitor *monitor,
-                           char **error);
+GWindow *gui_create_window(
+    GlobalGui *gui, int width, int height, const char *title, GMonitor *monitor, char **error);
 void gui_destroy_window(GWindow *window);
 /*
 void gui_set_window_size_limits(GWindow *window,
@@ -826,10 +813,12 @@ void gui_set_window_aspect_ratio(GWindow *window, int numer, int denom);
 void gui_show_window(GWindow *window);
 void gui_set_window_monitor(GWindow *window,
                             GMonitor *monitor,
-                            int xpos, int ypos,
-                            int width, int height,
+                            int xpos,
+                            int ypos,
+                            int width,
+                            int height,
                             int refresh_rate);
-// }}} 
+// }}}
 
 // Public input abstract API {{{
 #if 0
@@ -847,15 +836,15 @@ void gui_destroy_cursor(GlobalGui *gui, GCursor *cursor);
 void gui_set_cursor(GWindow *window, GCursor *cursor);
 // gui_set_clipboard_string(window, string) is implemented in platform code
 // gui_get_clipboard_string(window) is implemented in platform code
-// }}} 
+// }}}
 
 // Abtract Time API {{{
 double gui_get_time(GlobalGui *gui);
 void gui_set_time(GlobalGui *gui, double time);
 // gui_get_timer_value() is implemented in platform code
 // gui_get_timer_frequency() is implemented in platform code
-// }}} 
-// }}} 
+// }}}
+// }}}
 
 #ifdef __cplusplus
 };
@@ -866,278 +855,264 @@ void gui_set_time(GlobalGui *gui, double time);
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include <assert.h>
+#include <float.h>
+#include <limits.h>
 #include <math.h>
 #include <string.h>
-#include <limits.h>
-#include <float.h>
-#include <assert.h>
 
 // Initialization API {{{
 static void fail_event_handler(GWindowEvent event) {
-  assert(false &&
-      "Events should not be triggered before GlobalGui initialization.");
+  assert(false && "Events should not be triggered before GlobalGui initialization.");
 }
 
 static void null_event_handler(GWindowEvent event) {
   // do nothing
 }
 
-static void init_hints(GlobalGui *gui)
-{
-    memset(&gui->hints, 0, sizeof(gui->hints));
+static void init_hints(GlobalGui *gui) {
+  memset(&gui->hints, 0, sizeof(gui->hints));
 
-    // The default is OpenGL 3.x
-    // gui->hints.context.api = (OpenGL | OpenES);
-    gui->hints.context.major = 3;
-    // gui->hints.context.minor = 0;
+  // The default is OpenGL 3.x
+  // gui->hints.context.api = (OpenGL | OpenES);
+  gui->hints.context.major = 3;
+  // gui->hints.context.minor = 0;
 
-    // The default is a focused, visible, resizable window with decorations
-    gui->hints.window.resizable    = true;
-    gui->hints.window.visible      = true;
-    gui->hints.window.decorated    = true;
-    gui->hints.window.focused      = true;
-    gui->hints.window.auto_iconify = true;
+  // The default is a focused, visible, resizable window with decorations
+  gui->hints.window.resizable    = true;
+  gui->hints.window.visible      = true;
+  gui->hints.window.decorated    = true;
+  gui->hints.window.focused      = true;
+  gui->hints.window.auto_iconify = true;
 
-    // The default is
-    // - 32 bits of color
-    // - 24 bits of depth
-    // - 8 bits of stencil
-    // - double buffered
-    gui->hints.framebuffer.red_bits      = 8;
-    gui->hints.framebuffer.green_bits    = 8;
-    gui->hints.framebuffer.blue_bits     = 8;
-    gui->hints.framebuffer.alpha_bits    = 8;
-    gui->hints.framebuffer.depth_bits    = 24;
-    gui->hints.framebuffer.stencil_bits  = 8;
-    gui->hints.framebuffer.double_buffer = true;
+  // The default is
+  // - 32 bits of color
+  // - 24 bits of depth
+  // - 8 bits of stencil
+  // - double buffered
+  gui->hints.framebuffer.red_bits      = 8;
+  gui->hints.framebuffer.green_bits    = 8;
+  gui->hints.framebuffer.blue_bits     = 8;
+  gui->hints.framebuffer.alpha_bits    = 8;
+  gui->hints.framebuffer.depth_bits    = 24;
+  gui->hints.framebuffer.stencil_bits  = 8;
+  gui->hints.framebuffer.double_buffer = true;
 
-    gui->hints.framebuffer.stereo        = false;
-    gui->hints.framebuffer.samples       = -1;
+  gui->hints.framebuffer.stereo  = false;
+  gui->hints.framebuffer.samples = -1;
 
-    // The default is to select the highest available refresh rate
-    // gui->hints.refresh_rate = -1;
+  // The default is to select the highest available refresh rate
+  // gui->hints.refresh_rate = -1;
 }
 
-bool gui_init(GlobalGui *gui, char **error)
-{
+bool gui_init(GlobalGui *gui, char **error) {
   memset(gui, 0, sizeof(GlobalGui));
   gui->handle_event = fail_event_handler;
   init_hints(gui);
-  bool status = gui_platform_init(gui, error);
+  bool status       = gui_platform_init(gui, error);
   gui->handle_event = null_event_handler;
   return status;
 }
 
-void gui_terminate(GlobalGui *gui)
-{
-    while (gui->window_list_head) {
-      gui_destroy_window(gui->window_list_head);
+void gui_terminate(GlobalGui *gui) {
+  while (gui->window_list_head) {
+    gui_destroy_window(gui->window_list_head);
+  }
+
+  while (gui->cursor_list_head) {
+    gui_destroy_cursor(gui, gui->cursor_list_head);
+  }
+
+  for (size_t i = 0; i < gui->monitor_count; i++) {
+    GMonitor *monitor = gui->monitors[i];
+    if (monitor->original_ramp.size) {
+      gui_platform_set_gamma_ramp(monitor, &monitor->original_ramp);
     }
+  }
 
-    while (gui->cursor_list_head) {
-        gui_destroy_cursor(gui, gui->cursor_list_head);
-    }
+  free_monitors(gui->monitors, gui->monitor_count);
+  gui->monitors      = NULL;
+  gui->monitor_count = 0;
 
-    for (size_t i = 0;  i < gui->monitor_count; i++) {
-        GMonitor* monitor = gui->monitors[i];
-        if (monitor->original_ramp.size) {
-            gui_platform_set_gamma_ramp(monitor, &monitor->original_ramp);
-        }
-    }
+  // TODO
+  /* gui_platform_terminate(); */
 
-    free_monitors(gui->monitors, gui->monitor_count);
-    gui->monitors = NULL;
-    gui->monitor_count = 0;
-
-    // TODO
-    /* gui_platform_terminate(); */
-
-    memset(gui, 0, sizeof(*gui));
+  memset(gui, 0, sizeof(*gui));
 }
-// }}} 
+// }}}
 
 // Internal monitor abstract API {{{
 
 // Lexically compare video modes (used by qsort)
-static int compare_video_modes(const void *fp, const void *sp)
-{
-    const GVideoMode *fm = (GVideoMode *)fp;
-    const GVideoMode *sm = (GVideoMode *)sp;
-    const int fbpp = fm->red_bits + fm->green_bits + fm->blue_bits;
-    const int sbpp = sm->red_bits + sm->green_bits + sm->blue_bits;
-    const int farea = fm->width * fm->height;
-    const int sarea = sm->width * sm->height;
+static int compare_video_modes(const void *fp, const void *sp) {
+  const GVideoMode *fm = (GVideoMode *)fp;
+  const GVideoMode *sm = (GVideoMode *)sp;
+  const int fbpp       = fm->red_bits + fm->green_bits + fm->blue_bits;
+  const int sbpp       = sm->red_bits + sm->green_bits + sm->blue_bits;
+  const int farea      = fm->width * fm->height;
+  const int sarea      = sm->width * sm->height;
 
-    // First sort on color bits per pixel
-    if (fbpp != sbpp) {
-        return fbpp - sbpp;
-    }
+  // First sort on color bits per pixel
+  if (fbpp != sbpp) {
+    return fbpp - sbpp;
+  }
 
-    // Then sort on screen area
-    if (farea != sarea) {
-        return farea - sarea;
-    }
+  // Then sort on screen area
+  if (farea != sarea) {
+    return farea - sarea;
+  }
 
-    // Lastly sort on refresh rate
-    return fm->refresh_rate - sm->refresh_rate;
+  // Lastly sort on refresh rate
+  return fm->refresh_rate - sm->refresh_rate;
 }
 
 // Retrieves the available modes for the specified monitor
-static bool refresh_video_modes(GMonitor *monitor)
-{
-    if (monitor->modes) {
-        return true;
-    }
-
-    int mode_count;
-    GVideoMode *modes = gui_platform_get_video_modes(monitor, &mode_count);
-    if (!modes) {
-        return false;
-    }
-
-    qsort(modes, mode_count, sizeof(GVideoMode), compare_video_modes);
-
-    free(monitor->modes);
-    monitor->modes = modes;
-    monitor->mode_count = mode_count;
-
+static bool refresh_video_modes(GMonitor *monitor) {
+  if (monitor->modes) {
     return true;
+  }
+
+  int mode_count;
+  GVideoMode *modes = gui_platform_get_video_modes(monitor, &mode_count);
+  if (!modes) {
+    return false;
+  }
+
+  qsort(modes, mode_count, sizeof(GVideoMode), compare_video_modes);
+
+  free(monitor->modes);
+  monitor->modes      = modes;
+  monitor->mode_count = mode_count;
+
+  return true;
 }
 
 // May raise a non-fatal error.
-void gui_input_monitor_change(GlobalGui *gui, char **error)
-{
-    GMonitor **monitors = gui->monitors;
-    size_t monitor_count = gui->monitor_count;
+void gui_input_monitor_change(GlobalGui *gui, char **error) {
+  GMonitor **monitors  = gui->monitors;
+  size_t monitor_count = gui->monitor_count;
 
-    gui->monitors = gui_platform_get_monitors(&gui->monitor_count, error);
+  gui->monitors = gui_platform_get_monitors(&gui->monitor_count, error);
 
-    // Re-use still connected monitor objects
+  // Re-use still connected monitor objects
 
-    for (size_t i = 0; i < gui->monitor_count; i++) {
-        for (size_t j = 0; j < monitor_count; j++) {
-            if (gui_is_same_monitor(gui->monitors[i], monitors[j])) {
-                free_monitor(gui->monitors[i]);
-                gui->monitors[i] = monitors[j];
-                break;
-            }
-        }
+  for (size_t i = 0; i < gui->monitor_count; i++) {
+    for (size_t j = 0; j < monitor_count; j++) {
+      if (gui_is_same_monitor(gui->monitors[i], monitors[j])) {
+        free_monitor(gui->monitors[i]);
+        gui->monitors[i] = monitors[j];
+        break;
+      }
+    }
+  }
+
+  // Find and report disconnected monitors (not in the new list)
+
+  for (size_t i = 0; i < monitor_count; i++) {
+    GWindow *window;
+
+    size_t j;
+    for (j = 0; j < gui->monitor_count; j++) {
+      if (monitors[i] == gui->monitors[j]) {
+        break;
+      }
     }
 
-    // Find and report disconnected monitors (not in the new list)
-
-    for (size_t i = 0; i < monitor_count; i++) {
-        GWindow *window;
-
-        size_t j;
-        for (j = 0; j < gui->monitor_count; j++) {
-            if (monitors[i] == gui->monitors[j]) {
-                break;
-            }
-        }
-
-        if (j < gui->monitor_count) {
-            continue;
-        }
-
-        for (window = gui->window_list_head; window; window = window->next) {
-            if (window->monitor == monitors[i]) {
-                int width, height;
-                gui_platform_get_window_size(window, &width, &height);
-                gui_set_window_monitor(window, NULL, 0, 0, width, height, 0);
-            }
-        }
-
-        // TODO: dipatch the monitor disconnected event
-        /* if (gui->callbacks.monitor) */
-        /*     gui->callbacks.monitor((GMonitor*) monitors[i], GLFW_DISCONNECTED); */
+    if (j < gui->monitor_count) {
+      continue;
     }
 
-    // Find and report newly connected monitors (not in the old list)
-    // Re-used monitor objects are then removed from the old list to avoid
-    // having them destroyed at the end of this function
-
-    for (size_t i = 0; i < gui->monitor_count; i++) {
-      size_t j;
-        for (j = 0; j < monitor_count; j++) {
-            if (gui->monitors[i] == monitors[j]) {
-                monitors[j] = NULL;
-                break;
-            }
-        }
-
-        if (j < monitor_count) {
-            continue;
-        }
-
-        // TODO: dispatch the monitor connected event
-        /* if (gui->callbacks.monitor) */
-        /*     gui->callbacks.monitor((GMonitor*) gui->monitors[i], GLFW_CONNECTED); */
+    for (window = gui->window_list_head; window; window = window->next) {
+      if (window->monitor == monitors[i]) {
+        int width, height;
+        gui_platform_get_window_size(window, &width, &height);
+        gui_set_window_monitor(window, NULL, 0, 0, width, height, 0);
+      }
     }
 
-    free_monitors(monitors, monitor_count);
-}
+    // TODO: dipatch the monitor disconnected event
+    /* if (gui->callbacks.monitor) */
+    /*     gui->callbacks.monitor((GMonitor*) monitors[i], GLFW_DISCONNECTED); */
+  }
 
-GMonitor *alloc_monitor(const char *name, int width_mm, int height_mm)
-{
-    GMonitor *monitor = (GMonitor *)calloc(1, sizeof(GMonitor));
-    monitor->name = strdup(name);
-    monitor->width_mm = width_mm;
-    monitor->height_mm = height_mm;
+  // Find and report newly connected monitors (not in the old list)
+  // Re-used monitor objects are then removed from the old list to avoid
+  // having them destroyed at the end of this function
 
-    return monitor;
-}
-
-void free_monitor(GMonitor *monitor)
-{
-    if (monitor == NULL) {
-        return;
+  for (size_t i = 0; i < gui->monitor_count; i++) {
+    size_t j;
+    for (j = 0; j < monitor_count; j++) {
+      if (gui->monitors[i] == monitors[j]) {
+        monitors[j] = NULL;
+        break;
+      }
     }
 
-    free_gamma_arrays(&monitor->original_ramp);
-    free_gamma_arrays(&monitor->current_ramp);
-
-    free(monitor->modes);
-    free(monitor->name);
-    free(monitor);
-}
-
-void alloc_gamma_arrays(GGammaRamp *ramp, uint32_t size)
-{
-    ramp->red = (uint16_t *)calloc(size, sizeof(uint16_t));
-    ramp->green = (uint16_t *)calloc(size, sizeof(uint16_t));
-    ramp->blue = (uint16_t *)calloc(size, sizeof(uint16_t));
-    ramp->size = size;
-}
-
-void free_gamma_arrays(GGammaRamp *ramp)
-{
-    free(ramp->red);
-    free(ramp->green);
-    free(ramp->blue);
-
-    memset(ramp, 0, sizeof(GGammaRamp));
-}
-
-void free_monitors(GMonitor **monitors, int count)
-{
-    for (int i = 0; i < count; i++) {
-        free_monitor(monitors[i]);
+    if (j < monitor_count) {
+      continue;
     }
-    free(monitors);
+
+    // TODO: dispatch the monitor connected event
+    /* if (gui->callbacks.monitor) */
+    /*     gui->callbacks.monitor((GMonitor*) gui->monitors[i], GLFW_CONNECTED); */
+  }
+
+  free_monitors(monitors, monitor_count);
 }
 
-const GVideoMode *gui_choose_video_mode(GMonitor *monitor,
-                                        const GVideoMode *desired)
-{
+GMonitor *alloc_monitor(const char *name, int width_mm, int height_mm) {
+  GMonitor *monitor  = (GMonitor *)calloc(1, sizeof(GMonitor));
+  monitor->name      = strdup(name);
+  monitor->width_mm  = width_mm;
+  monitor->height_mm = height_mm;
+
+  return monitor;
+}
+
+void free_monitor(GMonitor *monitor) {
+  if (monitor == NULL) {
+    return;
+  }
+
+  free_gamma_arrays(&monitor->original_ramp);
+  free_gamma_arrays(&monitor->current_ramp);
+
+  free(monitor->modes);
+  free(monitor->name);
+  free(monitor);
+}
+
+void alloc_gamma_arrays(GGammaRamp *ramp, uint32_t size) {
+  ramp->red   = (uint16_t *)calloc(size, sizeof(uint16_t));
+  ramp->green = (uint16_t *)calloc(size, sizeof(uint16_t));
+  ramp->blue  = (uint16_t *)calloc(size, sizeof(uint16_t));
+  ramp->size  = size;
+}
+
+void free_gamma_arrays(GGammaRamp *ramp) {
+  free(ramp->red);
+  free(ramp->green);
+  free(ramp->blue);
+
+  memset(ramp, 0, sizeof(GGammaRamp));
+}
+
+void free_monitors(GMonitor **monitors, int count) {
+  for (int i = 0; i < count; i++) {
+    free_monitor(monitors[i]);
+  }
+  free(monitors);
+}
+
+const GVideoMode *gui_choose_video_mode(GMonitor *monitor, const GVideoMode *desired) {
   if (!refresh_video_modes(monitor)) {
     return NULL;
   }
 
   const GVideoMode *closest = NULL;
 
-  unsigned int least_size_diff = UINT_MAX;
-  unsigned int least_rate_diff = UINT_MAX;
+  unsigned int least_size_diff  = UINT_MAX;
+  unsigned int least_rate_diff  = UINT_MAX;
   unsigned int least_color_diff = UINT_MAX;
   for (int i = 0; i < monitor->mode_count; i++) {
     const GVideoMode *current = monitor->modes + i;
@@ -1155,10 +1130,8 @@ const GVideoMode *gui_choose_video_mode(GMonitor *monitor,
     }
 
     unsigned int size_diff;
-    size_diff = abs((current->width - desired->width) *
-                    (current->width - desired->width) +
-                    (current->height - desired->height) *
-                    (current->height - desired->height));
+    size_diff = abs((current->width - desired->width) * (current->width - desired->width) +
+                    (current->height - desired->height) * (current->height - desired->height));
 
     unsigned int rate_diff;
     if (desired->refresh_rate != -1) {
@@ -1169,11 +1142,11 @@ const GVideoMode *gui_choose_video_mode(GMonitor *monitor,
 
     if ((color_diff < least_color_diff) ||
         (color_diff == least_color_diff && size_diff < least_size_diff) ||
-        (color_diff == least_color_diff && size_diff == least_size_diff && rate_diff < least_rate_diff)) {
-
-      closest = current;
-      least_size_diff = size_diff;
-      least_rate_diff = rate_diff;
+        (color_diff == least_color_diff && size_diff == least_size_diff &&
+         rate_diff < least_rate_diff)) {
+      closest          = current;
+      least_size_diff  = size_diff;
+      least_rate_diff  = rate_diff;
       least_color_diff = color_diff;
     }
   }
@@ -1181,110 +1154,101 @@ const GVideoMode *gui_choose_video_mode(GMonitor *monitor,
   return closest;
 }
 
-int gui_compare_video_modes(const GVideoMode *fm, const GVideoMode *sm)
-{
-    return compare_video_modes(fm, sm);
+int gui_compare_video_modes(const GVideoMode *fm, const GVideoMode *sm) {
+  return compare_video_modes(fm, sm);
 }
 
-void gui_split_bpp(int bpp, int *red, int *green, int *blue)
-{
-    // We assume that by 32 the user really meant 24
-    if (bpp == 32) {
-        bpp = 24;
-    }
+void gui_split_bpp(int bpp, int *red, int *green, int *blue) {
+  // We assume that by 32 the user really meant 24
+  if (bpp == 32) {
+    bpp = 24;
+  }
 
-    // Convert "bits per pixel" to red, green & blue sizes
+  // Convert "bits per pixel" to red, green & blue sizes
 
-    *red = *green = *blue = bpp / 3;
-    int delta = bpp - (*red * 3);
-    if (delta >= 1) {
-        *green = *green + 1;
-    }
-    if (delta == 2) {
-        *red = *red + 1;
-    }
+  *red = *green = *blue = bpp / 3;
+  int delta             = bpp - (*red * 3);
+  if (delta >= 1) {
+    *green = *green + 1;
+  }
+  if (delta == 2) {
+    *red = *red + 1;
+  }
 }
 
 // }}}
 
 // Public monitor abstract API {{{
-GMonitor **gui_get_monitors(GlobalGui *gui, size_t *count)
-{
-    assert(count != NULL);
-    *count = 0;
+GMonitor **gui_get_monitors(GlobalGui *gui, size_t *count) {
+  assert(count != NULL);
+  *count = 0;
 
-    *count = gui->monitor_count;
-    return (GMonitor **) gui->monitors;
+  *count = gui->monitor_count;
+  return (GMonitor **)gui->monitors;
 }
 
-GMonitor *gui_get_primary_monitor(GlobalGui *gui)
-{
-    if (!gui->monitor_count) {
-        return NULL;
-    }
+GMonitor *gui_get_primary_monitor(GlobalGui *gui) {
+  if (!gui->monitor_count) {
+    return NULL;
+  }
 
-    return (GMonitor *) gui->monitors[0];
+  return (GMonitor *)gui->monitors[0];
 }
 
-void gui_get_monitor_pos(GMonitor *monitor, int *xpos, int *ypos)
-{
-    assert(monitor != NULL);
+void gui_get_monitor_pos(GMonitor *monitor, int *xpos, int *ypos) {
+  assert(monitor != NULL);
 
-    if (xpos) {
-        *xpos = 0;
-    }
-    if (ypos) {
-        *ypos = 0;
-    }
+  if (xpos) {
+    *xpos = 0;
+  }
+  if (ypos) {
+    *ypos = 0;
+  }
 
-    gui_platform_get_monitor_pos(monitor, xpos, ypos);
+  gui_platform_get_monitor_pos(monitor, xpos, ypos);
 }
 
-void gui_get_monitor_physical_size(GMonitor *monitor, int *width_mm, int *height_mm)
-{
-    assert(monitor != NULL);
+void gui_get_monitor_physical_size(GMonitor *monitor, int *width_mm, int *height_mm) {
+  assert(monitor != NULL);
 
-    if (width_mm) {
-        *width_mm = 0;
-    }
-    if (height_mm) {
-        *height_mm = 0;
-    }
+  if (width_mm) {
+    *width_mm = 0;
+  }
+  if (height_mm) {
+    *height_mm = 0;
+  }
 
-    if (width_mm) {
-        *width_mm = monitor->width_mm;
-    }
-    if (height_mm) {
-        *height_mm = monitor->height_mm;
-    }
+  if (width_mm) {
+    *width_mm = monitor->width_mm;
+  }
+  if (height_mm) {
+    *height_mm = monitor->height_mm;
+  }
 }
 
 // const char *gui_get_monitor_name(GMonitor *monitor)
 // monitor->name
 
-const GVideoMode *gui_get_video_modes(GMonitor *monitor, int *count)
-{
-    assert(monitor != NULL);
-    assert(count != NULL);
-    *count = 0;
+const GVideoMode *gui_get_video_modes(GMonitor *monitor, int *count) {
+  assert(monitor != NULL);
+  assert(count != NULL);
+  *count = 0;
 
-    if (!refresh_video_modes(monitor)) {
-        return NULL;
-    }
+  if (!refresh_video_modes(monitor)) {
+    return NULL;
+  }
 
-    *count = monitor->mode_count;
-    return monitor->modes;
+  *count = monitor->mode_count;
+  return monitor->modes;
 }
 
-const GVideoMode *gui_get_video_mode(GMonitor *monitor)
-{
-    assert(monitor != NULL);
-    gui_platform_get_video_mode(monitor, &monitor->current_mode);
-    return &monitor->current_mode;
+const GVideoMode *gui_get_video_mode(GMonitor *monitor) {
+  assert(monitor != NULL);
+  gui_platform_get_video_mode(monitor, &monitor->current_mode);
+  return &monitor->current_mode;
 }
 
-void gui_set_gamma(GMonitor *monitor, float gamma, char **error)
-{
+void gui_set_gamma(GMonitor *monitor, float gamma, char **error) {
   uint16_t values[256];
   GGammaRamp ramp;
 
@@ -1293,7 +1257,7 @@ void gui_set_gamma(GMonitor *monitor, float gamma, char **error)
     return;
   }
 
-  for (int i = 0;  i < 256;  i++) {
+  for (int i = 0; i < 256; i++) {
     // Calculate intensity
     double value = i / 255.0;
     // Apply gamma curve
@@ -1304,52 +1268,49 @@ void gui_set_gamma(GMonitor *monitor, float gamma, char **error)
       value = 65535.0;
     }
 
-    values[i] = (uint16_t) value;
+    values[i] = (uint16_t)value;
   }
 
-  ramp.red = values;
+  ramp.red   = values;
   ramp.green = values;
-  ramp.blue = values;
-  ramp.size = 256;
+  ramp.blue  = values;
+  ramp.size  = 256;
 
   gui_set_gamma_ramp(monitor, &ramp);
 }
 
-const GGammaRamp *gui_get_gamma_ramp(GMonitor *monitor)
-{
-    assert(monitor != NULL);
+const GGammaRamp *gui_get_gamma_ramp(GMonitor *monitor) {
+  assert(monitor != NULL);
 
-    free_gamma_arrays(&monitor->current_ramp);
-    gui_platform_get_gamma_ramp(monitor, &monitor->current_ramp);
+  free_gamma_arrays(&monitor->current_ramp);
+  gui_platform_get_gamma_ramp(monitor, &monitor->current_ramp);
 
-    return &monitor->current_ramp;
+  return &monitor->current_ramp;
 }
 
-void gui_set_gamma_ramp(GMonitor *monitor, const GGammaRamp *ramp)
-{
-    assert(monitor != NULL);
-    assert(ramp != NULL);
+void gui_set_gamma_ramp(GMonitor *monitor, const GGammaRamp *ramp) {
+  assert(monitor != NULL);
+  assert(ramp != NULL);
 
-    if (!monitor->original_ramp.size) {
-        gui_platform_get_gamma_ramp(monitor, &monitor->original_ramp);
-    }
+  if (!monitor->original_ramp.size) {
+    gui_platform_get_gamma_ramp(monitor, &monitor->original_ramp);
+  }
 
-    gui_platform_set_gamma_ramp(monitor, ramp);
+  gui_platform_set_gamma_ramp(monitor, ramp);
 }
 // }}}
 
 // Internal input abstract API {{{
 
 // Sets the cursor mode for the specified window
-static void set_cursor_mode(GWindow *window, GCursorMode new_mode, char **error)
-{
+static void set_cursor_mode(GWindow *window, GCursorMode new_mode, char **error) {
   const int old_mode = window->cursor_mode;
 
   if (old_mode == new_mode) {
     return;
   }
 
-  GlobalGui *gui = window->gui;
+  GlobalGui *gui      = window->gui;
   window->cursor_mode = new_mode;
 
   if (gui->cursor_window == window) {
@@ -1371,15 +1332,14 @@ static void set_cursor_mode(GWindow *window, GCursorMode new_mode, char **error)
 }
 
 // Set sticky keys mode for the specified window
-static void set_sticky_keys(GWindow *window, int enabled)
-{
+static void set_sticky_keys(GWindow *window, int enabled) {
   if (window->sticky_keys == enabled) {
     return;
   }
 
   if (!enabled) {
     // Release all sticky keys
-    for (int i = 0;  i <= GUI_KEY_LAST;  i++) {
+    for (int i = 0; i <= GUI_KEY_LAST; i++) {
       if (window->keys[i] == GUI_KEY_STICK) {
         window->keys[i] = kRelease;
       }
@@ -1390,8 +1350,7 @@ static void set_sticky_keys(GWindow *window, int enabled)
 }
 
 // Set sticky mouse buttons mode for the specified window
-static void set_sticky_mouse_button(GWindow *window, int enabled)
-{
+static void set_sticky_mouse_button(GWindow *window, int enabled) {
   if (window->sticky_mouse_buttons == enabled) {
     return;
   }
@@ -1408,17 +1367,14 @@ static void set_sticky_mouse_button(GWindow *window, int enabled)
   window->sticky_mouse_buttons = enabled;
 }
 
-bool gui_is_printable(GKey key)
-{
+bool gui_is_printable(GKey key) {
   return (key >= GUI_KEY_APOSTROPHE && key <= GUI_KEY_WORLD_2) ||
-         (key >= GUI_KEY_KP_0 && key <= GUI_KEY_KP_ADD) ||
-         key == GUI_KEY_KP_EQUAL;
+         (key >= GUI_KEY_KP_0 && key <= GUI_KEY_KP_ADD) || key == GUI_KEY_KP_EQUAL;
 }
 // }}}
 
 // Public event abstract API {{{
-void gui_input_key(GWindow *window, GKey key, int scancode, int action, int mods)
-{
+void gui_input_key(GWindow *window, GKey key, int scancode, int action, int mods) {
   if (key >= 0 && key <= GUI_KEY_LAST) {
     bool repeated = false;
 
@@ -1431,7 +1387,7 @@ void gui_input_key(GWindow *window, GKey key, int scancode, int action, int mods
     if (action == kRelease && window->sticky_keys) {
       window->keys[key] = GUI_KEY_STICK;
     } else {
-      window->keys[key] = (char) action;
+      window->keys[key] = (char)action;
     }
 
     if (repeated) {
@@ -1440,45 +1396,42 @@ void gui_input_key(GWindow *window, GKey key, int scancode, int action, int mods
   }
 
   GWindowEvent event;
-  event.type = kWindowKey;
-  event.window = window;
-  event.e.key.key = key;
+  event.type           = kWindowKey;
+  event.window         = window;
+  event.e.key.key      = key;
   event.e.key.scancode = scancode;
-  event.e.key.action = action;
-  event.e.key.mods = mods;
+  event.e.key.action   = action;
+  event.e.key.mods     = mods;
 
   window->gui->handle_event(event);
 }
 
-void gui_input_char(GWindow *window, unsigned int codepoint, int mods, bool plain)
-{
+void gui_input_char(GWindow *window, unsigned int codepoint, int mods, bool plain) {
   if (codepoint < 32 || (codepoint > 126 && codepoint < 160)) {
     return;
   }
 
   GWindowEvent event;
-  event.type = kWindowChar;
-  event.window = window;
+  event.type              = kWindowChar;
+  event.window            = window;
   event.e.char_.codepoint = codepoint;
-  event.e.char_.mods = mods;
-  event.e.char_.plain = plain;
+  event.e.char_.mods      = mods;
+  event.e.char_.plain     = plain;
 
   window->gui->handle_event(event);
 }
 
-void gui_input_scroll(GWindow *window, double xoffset, double yoffset)
-{
+void gui_input_scroll(GWindow *window, double xoffset, double yoffset) {
   GWindowEvent event;
-  event.type = kWindowScroll;
-  event.window = window;
+  event.type             = kWindowScroll;
+  event.window           = window;
   event.e.scroll.xoffset = xoffset;
   event.e.scroll.yoffset = yoffset;
 
   window->gui->handle_event(event);
 }
 
-void gui_input_mouse_click(GWindow *window, GMouseButton button, int action, int mods)
-{
+void gui_input_mouse_click(GWindow *window, GMouseButton button, int action, int mods) {
   if (button > kMouseButtonLast) {
     return;
   }
@@ -1487,21 +1440,20 @@ void gui_input_mouse_click(GWindow *window, GMouseButton button, int action, int
   if (action == kRelease && window->sticky_mouse_buttons) {
     window->mouse_buttons[button] = GUI_KEY_STICK;
   } else {
-    window->mouse_buttons[button] = (char) action;
+    window->mouse_buttons[button] = (char)action;
   }
 
   GWindowEvent event;
-  event.type = kWindowMouse;
-  event.window = window;
+  event.type           = kWindowMouse;
+  event.window         = window;
   event.e.mouse.button = (GMouseButton)button;
   event.e.mouse.action = (GMouseAction)action;
-  event.e.mouse.mods = mods;
+  event.e.mouse.mods   = mods;
 
   window->gui->handle_event(event);
 }
 
-void gui_input_cursor_motion(GWindow *window, double x, double y)
-{
+void gui_input_cursor_motion(GWindow *window, double x, double y) {
   if (window->cursor_mode == kCursorDisabled) {
     if (x == 0.0 && y == 0.0) {
       return;
@@ -1515,40 +1467,37 @@ void gui_input_cursor_motion(GWindow *window, double x, double y)
   }
 
   GWindowEvent event;
-  event.type = kWindowCursorMotion;
-  event.window = window;
+  event.type       = kWindowCursorMotion;
+  event.window     = window;
   event.e.cursor.x = x;
   event.e.cursor.y = y;
 
   window->gui->handle_event(event);
 }
 
-void gui_input_cursor_enter(GWindow *window, bool entered)
-{
+void gui_input_cursor_enter(GWindow *window, bool entered) {
   GWindowEvent event;
-  event.type = kWindowCursorEnterChange;
-  event.window = window;
+  event.type             = kWindowCursorEnterChange;
+  event.window           = window;
   event.e.cursor.entered = entered;
 
   window->gui->handle_event(event);
 }
 
-void gui_input_drop(GWindow *window, int count, const char **paths)
-{
+void gui_input_drop(GWindow *window, int count, const char **paths) {
   GWindowEvent event;
-  event.type = kWindowDrop;
-  event.window = window;
+  event.type         = kWindowDrop;
+  event.window       = window;
   event.e.drop.count = count;
   event.e.drop.paths = paths;
 
   window->gui->handle_event(event);
 }
 
-void gui_input_window_focus(GWindow *window, bool focused)
-{
+void gui_input_window_focus(GWindow *window, bool focused) {
   GWindowEvent event;
-  event.type = kWindowFocusChange;
-  event.window = window;
+  event.type      = kWindowFocusChange;
+  event.window    = window;
   event.e.focused = focused;
 
   if (focused) {
@@ -1568,7 +1517,7 @@ void gui_input_window_focus(GWindow *window, bool focused)
     }
 
     // Release all pressed mouse buttons
-    for (int i = 0;  i <= kMouseButtonLast;  i++) {
+    for (int i = 0; i <= kMouseButtonLast; i++) {
       if (window->mouse_buttons[i] == kPress) {
         gui_input_mouse_click(window, (GMouseButton)i, kRelease, 0);
       }
@@ -1576,72 +1525,65 @@ void gui_input_window_focus(GWindow *window, bool focused)
   }
 }
 
-void gui_input_window_pos(GWindow *window, int x, int y)
-{
+void gui_input_window_pos(GWindow *window, int x, int y) {
   GWindowEvent event;
-  event.type = kWindowMove;
-  event.window = window;
+  event.type    = kWindowMove;
+  event.window  = window;
   event.e.pos.x = x;
   event.e.pos.y = y;
 
   window->gui->handle_event(event);
 }
 
-void gui_input_window_size(GWindow *window, int width, int height)
-{
+void gui_input_window_size(GWindow *window, int width, int height) {
   GWindowEvent event;
-  event.type = kWindowResize;
-  event.window = window;
-  event.e.size.width = width;
+  event.type          = kWindowResize;
+  event.window        = window;
+  event.e.size.width  = width;
   event.e.size.height = height;
 
   window->gui->handle_event(event);
 }
 
-void gui_input_window_iconify(GWindow *window, bool iconified)
-{
+void gui_input_window_iconify(GWindow *window, bool iconified) {
   GWindowEvent event;
-  event.type = kWindowIconifyChange;
-  event.window = window;
+  event.type        = kWindowIconifyChange;
+  event.window      = window;
   event.e.iconified = iconified;
 
   window->gui->handle_event(event);
 }
 
-void gui_input_framebuffer_size(GWindow *window, int width, int height)
-{
+void gui_input_framebuffer_size(GWindow *window, int width, int height) {
   GWindowEvent event;
-  event.type = kWindowFramebufferResize;
-  event.window = window;
-  event.e.size.width = width;
+  event.type          = kWindowFramebufferResize;
+  event.window        = window;
+  event.e.size.width  = width;
   event.e.size.height = height;
 
   window->gui->handle_event(event);
 }
 
-void gui_input_window_damage(GWindow *window)
-{
+void gui_input_window_damage(GWindow *window) {
   GWindowEvent event;
-  event.type = kWindowDamage;
+  event.type   = kWindowDamage;
   event.window = window;
 
   window->gui->handle_event(event);
 }
 
-void gui_input_window_close_request(GWindow *window)
-{
-    window->closed = true;
+void gui_input_window_close_request(GWindow *window) {
+  window->closed = true;
 
-    GWindowEvent event;
-    event.type = kWindowClose;
-    event.window = window;
+  GWindowEvent event;
+  event.type   = kWindowClose;
+  event.window = window;
 
-    window->gui->handle_event(event);
+  window->gui->handle_event(event);
 }
 
-void gui_input_window_monitor_change(GWindow *window, GMonitor *monitor)
-{
-    window->monitor = monitor;
+void gui_input_window_monitor_change(GWindow *window, GMonitor *monitor) {
+  window->monitor = monitor;
 }
 
 // }}}
@@ -1649,54 +1591,46 @@ void gui_input_window_monitor_change(GWindow *window, GMonitor *monitor)
 // Public window manipulation abstract API {{{
 
 // TODO: check how this is done in GLFW again
-GWindow *gui_create_window(GlobalGui *gui,
-                           int width,
-                           int height,
-                           const char *title,
-                           GMonitor *monitor,
-                           char **error)
-{
+GWindow *gui_create_window(
+    GlobalGui *gui, int width, int height, const char *title, GMonitor *monitor, char **error) {
   assert(title != NULL);
 
   GWindowConfig win_config = gui->hints.window;
-  win_config.width   = width;
-  win_config.height  = height;
-  win_config.title   = title;
+  win_config.width         = width;
+  win_config.height        = height;
+  win_config.title         = title;
 
-  GWindow *window = (GWindow *)calloc(1, sizeof(GWindow));
-  window->gui = gui;
-  window->next = gui->window_list_head;
+  GWindow *window       = (GWindow *)calloc(1, sizeof(GWindow));
+  window->gui           = gui;
+  window->next          = gui->window_list_head;
   gui->window_list_head = window;
 
-  window->video_mode.width        = width;
-  window->video_mode.height       = height;
-  window->video_mode.red_bits     = 8;
-  window->video_mode.green_bits   = 8;
-  window->video_mode.blue_bits    = 8;
+  window->video_mode.width      = width;
+  window->video_mode.height     = height;
+  window->video_mode.red_bits   = 8;
+  window->video_mode.green_bits = 8;
+  window->video_mode.blue_bits  = 8;
 
-  window->monitor       = (GMonitor*) monitor;
-  window->resizable     = gui->hints.window.resizable;
-  window->decorated     = gui->hints.window.decorated;
-  window->auto_iconify  = gui->hints.window.auto_iconify;
-  window->floating      = gui->hints.window.floating;
-  window->cursor_mode   = kCursorNormal;
+  window->monitor      = (GMonitor *)monitor;
+  window->resizable    = gui->hints.window.resizable;
+  window->decorated    = gui->hints.window.decorated;
+  window->auto_iconify = gui->hints.window.auto_iconify;
+  window->floating     = gui->hints.window.floating;
+  window->cursor_mode  = kCursorNormal;
 
-  window->minwidth     = -1;
-  window->minheight    = -1;
-  window->maxwidth     = -1;
-  window->maxheight    = -1;
-  window->numer        = -1;
-  window->denom        = -1;
+  window->minwidth  = -1;
+  window->minheight = -1;
+  window->maxwidth  = -1;
+  window->maxheight = -1;
+  window->numer     = -1;
+  window->denom     = -1;
 
   // Save the currently current context so it can be restored later
   // GWindow *previous = _glfwPlatformGetCurrentContext();
 
   // Open the actual window and create its context
-  if (!gui_platform_create_window(window,
-                                  &win_config,
-                                  &gui->hints.context,
-                                  &gui->hints.framebuffer,
-                                  error)) {
+  if (!gui_platform_create_window(
+          window, &win_config, &gui->hints.context, &gui->hints.framebuffer, error)) {
     gui_destroy_window(window);
     // gui_gl_make_context_current(previous);
     return NULL;
@@ -1724,43 +1658,42 @@ GWindow *gui_create_window(GlobalGui *gui,
   return window;
 }
 
-void gui_destroy_window(GWindow *window)
-{
-    // Allow closing of NULL (to match the behavior of free)
-    if (window == NULL) {
-        return;
+void gui_destroy_window(GWindow *window) {
+  // Allow closing of NULL (to match the behavior of free)
+  if (window == NULL) {
+    return;
+  }
+
+  // The window's context must not be current on another thread when the
+  // window is destroyed
+  // if (window == _glfwPlatformGetCurrentContext())
+  //   _glfwPlatformMakeContextCurrent(NULL);
+
+  GlobalGui *gui = window->gui;
+
+  // Clear the focused window pointer if this is the focused window
+  if (gui->cursor_window == window) {
+    gui->cursor_window = NULL;
+  }
+
+  gui_platform_destroy_window(window);
+
+  // Unlink window from global linked list
+  {
+    GWindow **prev = &gui->window_list_head;
+
+    while (*prev != window) {
+      prev = &((*prev)->next);
     }
 
-    // The window's context must not be current on another thread when the
-    // window is destroyed
-    // if (window == _glfwPlatformGetCurrentContext())
-    //   _glfwPlatformMakeContextCurrent(NULL);
+    *prev = window->next;
 
-    GlobalGui *gui = window->gui;
-
-    // Clear the focused window pointer if this is the focused window
-    if (gui->cursor_window == window) {
-        gui->cursor_window = NULL;
+    if (*prev != NULL) {
+      gui_platform_focus_window(*prev);
     }
+  }
 
-    gui_platform_destroy_window(window);
-
-    // Unlink window from global linked list
-    {
-        GWindow **prev = &gui->window_list_head;
-
-        while (*prev != window) {
-          prev = &((*prev)->next);
-        }
-
-        *prev = window->next;
-
-        if (*prev != NULL) {
-          gui_platform_focus_window(*prev);
-        }
-    }
-
-    free(window);
+  free(window);
 }
 
 // Trivial:
@@ -1777,38 +1710,37 @@ void gui_set_window_size_limits(GWindow *window,
                                 int minwidth, int minheight,
                                 int maxwidth, int maxheight)
 {
-    assert(window != NULL);
+  assert(window != NULL);
 
-    window->minwidth  = minwidth;
-    window->minheight = minheight;
-    window->maxwidth  = maxwidth;
-    window->maxheight = maxheight;
+  window->minwidth  = minwidth;
+  window->minheight = minheight;
+  window->maxwidth  = maxwidth;
+  window->maxheight = maxheight;
 
-    if (window->monitor || !window->resizable) {
-        return;
-    }
+  if (window->monitor || !window->resizable) {
+      return;
+  }
 
-    gui_platform_set_window_size_limits(window,
-                                        minwidth, minheight,
-                                        maxwidth, maxheight);
+  gui_platform_set_window_size_limits(window,
+                                      minwidth, minheight,
+                                      maxwidth, maxheight);
 }
 
 void gui_set_window_aspect_ratio(GWindow *window, int numer, int denom)
 {
-    assert(window != NULL);
-    assert(denom != 0);
+  assert(window != NULL);
+  assert(denom != 0);
 
-    window->numer = numer;
-    window->denom = denom;
+  window->numer = numer;
+  window->denom = denom;
 
-    if (window->monitor || !window->resizable) {
-        return;
-    }
+  if (window->monitor || !window->resizable) {
+      return;
+  }
 
-    gui_platform_set_window_aspect_ratio(window, numer, denom);
+  gui_platform_set_window_aspect_ratio(window, numer, denom);
 }
 */
-
 
 // gui_get_framebuffer_size() is implemented in the platform code
 // gui_set_window_frame_size() is implemented in the platform code
@@ -1816,16 +1748,15 @@ void gui_set_window_aspect_ratio(GWindow *window, int numer, int denom)
 // gui_restore_window() is implemented in the platform code
 // gui_maximize_window() is implemented in the platform code
 
-void gui_show_window(GWindow *window)
-{
-    assert(window != NULL);
+void gui_show_window(GWindow *window) {
+  assert(window != NULL);
 
-    if (window->monitor) {
-        return;
-    }
+  if (window->monitor) {
+    return;
+  }
 
-    gui_platform_show_window(window);
-    gui_platform_focus_window(window);
+  gui_platform_show_window(window);
+  gui_platform_focus_window(window);
 }
 
 void gui_set_window_monitor(GWindow *window,
@@ -1834,17 +1765,14 @@ void gui_set_window_monitor(GWindow *window,
                             int ypos,
                             int width,
                             int height,
-                            int refresh_rate)
-{
-    assert(window);
+                            int refresh_rate) {
+  assert(window);
 
-    window->video_mode.width = width;
-    window->video_mode.height = height;
-    window->video_mode.refresh_rate = refresh_rate;
+  window->video_mode.width        = width;
+  window->video_mode.height       = height;
+  window->video_mode.refresh_rate = refresh_rate;
 
-    gui_platform_set_window_monitor(window, monitor,
-                                    xpos, ypos, width, height,
-                                    refresh_rate);
+  gui_platform_set_window_monitor(window, monitor, xpos, ypos, width, height, refresh_rate);
 }
 
 // void gui_set_window_user_pointer(GWindow *window, void *pointer)
@@ -1889,8 +1817,7 @@ void gui_set_input_mode(GWindow *window, GWindowInputMode mode, int value)
 
 // gui_get_key_name(int key, int scancode) defined in platform code
 
-int gui_get_key(GWindow *window, GKey key, char **error)
-{
+int gui_get_key(GWindow *window, GKey key, char **error) {
   assert(window != NULL);
 
   if (key < 0 || key > GUI_KEY_LAST) {
@@ -1904,11 +1831,10 @@ int gui_get_key(GWindow *window, GKey key, char **error)
     return kPress;
   }
 
-  return (int) window->keys[key];
+  return (int)window->keys[key];
 }
 
-int gui_get_mouse_button(GWindow *window, GMouseButton button)
-{
+int gui_get_mouse_button(GWindow *window, GMouseButton button) {
   assert(window != NULL);
 
   if (window->mouse_buttons[button] == (char)kMouseButtonStick) {
@@ -1917,11 +1843,10 @@ int gui_get_mouse_button(GWindow *window, GMouseButton button)
     return kPress;
   }
 
-  return (int) window->mouse_buttons[button];
+  return (int)window->mouse_buttons[button];
 }
 
-void gui_get_cursor_pos(GWindow *window, double *xpos, double *ypos)
-{
+void gui_get_cursor_pos(GWindow *window, double *xpos, double *ypos) {
   assert(window != NULL);
 
   if (xpos) {
@@ -1943,8 +1868,7 @@ void gui_get_cursor_pos(GWindow *window, double *xpos, double *ypos)
   }
 }
 
-void gui_set_cursor_pos(GWindow *window, double xpos, double ypos)
-{
+void gui_set_cursor_pos(GWindow *window, double xpos, double ypos) {
   assert(window != NULL);
 
   if (window->gui->cursor_window != window) {
@@ -1962,46 +1886,40 @@ void gui_set_cursor_pos(GWindow *window, double xpos, double ypos)
 }
 
 GCursor *gui_create_cursor(GlobalGui *gui, const GImage *image, int xhot, int yhot) {
-    assert(image != NULL);
+  assert(image != NULL);
 
-    GCursor *cursor = (GCursor *)calloc(1, sizeof(GCursor));
-    cursor->next = gui->cursor_list_head;
-    gui->cursor_list_head = cursor;
+  GCursor *cursor       = (GCursor *)calloc(1, sizeof(GCursor));
+  cursor->next          = gui->cursor_list_head;
+  gui->cursor_list_head = cursor;
 
-    if (!gui_platform_create_cursor(cursor, image, xhot, yhot)) {
-        gui_destroy_cursor(gui, (GCursor *) cursor);
-        return NULL;
-    }
+  if (!gui_platform_create_cursor(cursor, image, xhot, yhot)) {
+    gui_destroy_cursor(gui, (GCursor *)cursor);
+    return NULL;
+  }
 
-    return (GCursor *) cursor;
+  return (GCursor *)cursor;
 }
 
-GCursor *gui_create_standard_cursor(GlobalGui *gui, GCursorShape shape, char **error)
-{
-  if (shape != kArrowCursor &&
-      shape != kIBeamCursor &&
-      shape != kCrosshairCursor &&
-      shape != kHandCursor &&
-      shape != kHResizeCursor &&
-      shape != kVResizeCursor) {
+GCursor *gui_create_standard_cursor(GlobalGui *gui, GCursorShape shape, char **error) {
+  if (shape != kArrowCursor && shape != kIBeamCursor && shape != kCrosshairCursor &&
+      shape != kHandCursor && shape != kHResizeCursor && shape != kVResizeCursor) {
     *error = "Invalid standard cursor";
     return NULL;
   }
 
-  GCursor *cursor = (GCursor *)calloc(1, sizeof(GCursor));
-  cursor->next = gui->cursor_list_head;
+  GCursor *cursor       = (GCursor *)calloc(1, sizeof(GCursor));
+  cursor->next          = gui->cursor_list_head;
   gui->cursor_list_head = cursor;
 
   if (!gui_platform_create_standard_cursor(cursor, shape, error)) {
-    gui_destroy_cursor(gui, (GCursor*) cursor);
+    gui_destroy_cursor(gui, (GCursor *)cursor);
     return NULL;
   }
 
-  return (GCursor *) cursor;
+  return (GCursor *)cursor;
 }
 
-void gui_destroy_cursor(GlobalGui *gui, GCursor *cursor)
-{
+void gui_destroy_cursor(GlobalGui *gui, GCursor *cursor) {
   if (cursor == NULL) {
     return;
   }
@@ -2009,7 +1927,7 @@ void gui_destroy_cursor(GlobalGui *gui, GCursor *cursor)
   // Make sure the cursor is not being used by any window
   for (GWindow *window = gui->window_list_head; window; window = window->next) {
     if (window->cursor == cursor) {
-      gui_set_cursor((GWindow *) window, NULL);
+      gui_set_cursor((GWindow *)window, NULL);
     }
   }
 
@@ -2027,11 +1945,10 @@ void gui_destroy_cursor(GlobalGui *gui, GCursor *cursor)
   free(cursor);
 }
 
-void gui_set_cursor(GWindow *window, GCursor *cursor)
-{
-    assert(window != NULL);
-    gui_platform_set_cursor(window, cursor);
-    window->cursor = cursor;
+void gui_set_cursor(GWindow *window, GCursor *cursor) {
+  assert(window != NULL);
+  gui_platform_set_cursor(window, cursor);
+  window->cursor = cursor;
 }
 
 // }}}
@@ -2040,16 +1957,12 @@ void gui_set_cursor(GWindow *window, GCursor *cursor)
 // gui_get_clipboard_string(window) is implemented in platform code
 
 // Abstract Time API {{{
-double gui_get_time(GlobalGui *gui)
-{
-  return (double) (gui_get_timer_value(gui) - gui->timer_offset) /
-    gui_get_timer_frequency(gui);
+double gui_get_time(GlobalGui *gui) {
+  return (double)(gui_get_timer_value(gui) - gui->timer_offset) / gui_get_timer_frequency(gui);
 }
 
-void gui_set_time(GlobalGui *gui, double time)
-{
-  gui->timer_offset = gui_get_timer_value(gui) -
-    (uint64_t)(time * gui_get_timer_frequency(gui));
+void gui_set_time(GlobalGui *gui, double time) {
+  gui->timer_offset = gui_get_timer_value(gui) - (uint64_t)(time * gui_get_timer_frequency(gui));
 }
 
 // gui_get_timer_value() is implemented in platform code
