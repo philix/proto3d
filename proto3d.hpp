@@ -25,11 +25,6 @@ stbi_uc *stbi_load(const char *, int *, int *, int *, int);
 
 // clang-format off
 // proto3d general compiler support macros {{{
-// A macro to disallow the copy constructor and operator= functions
-#define PROTO3D_DISALLOW_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const TypeName &) = delete;             \
-  TypeName &operator=(const TypeName &) = delete
-
 // g++ and clang++ expose their version as follows:
 //
 // g++ 4.8.3:
