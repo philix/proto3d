@@ -1,7 +1,7 @@
-#include <cstdio>
-#include <string>
 #include <fcntl.h>
 #include <pthread.h>
+#include <cstdio>
+#include <string>
 
 #define GUI_COMMON_IMPLEMENTATION
 #include "../../gui_common.h"
@@ -33,26 +33,27 @@ void DumpEventString(GWindowEvent *event) {
   switch (event->type) {
     case kWindowKey:
       printf("kWindowKey scancode=%d action=%d mods=%d\n",
-          e->key.scancode, e->key.action, e->key.mods);
+             e->key.scancode,
+             e->key.action,
+             e->key.mods);
       break;
     case kWindowChar:
       printf("kWindowChar codepoint=%u mods=%d plain=%d\n",
-          e->char_.codepoint, e->char_.mods, e->char_.plain);
+             e->char_.codepoint,
+             e->char_.mods,
+             e->char_.plain);
       break;
     case kWindowScroll:
-      printf("kWindowScroll xoffset=%lf yoffset=%lf\n",
-          e->scroll.xoffset, e->scroll.yoffset);
+      printf("kWindowScroll xoffset=%lf yoffset=%lf\n", e->scroll.xoffset, e->scroll.yoffset);
       break;
     case kWindowMouse:
       printf("kWindowMouse\n");
       break;
     case kWindowCursorMotion:
-      printf("kWindowCursorMotion x=%lf y=%lf\n",
-          e->cursor.x, e->cursor.y);
+      printf("kWindowCursorMotion x=%lf y=%lf\n", e->cursor.x, e->cursor.y);
       break;
     case kWindowCursorEnterChange:
-      printf("kWindowCursorEnterChange entered=%d\n",
-          e->cursor.entered);
+      printf("kWindowCursorEnterChange entered=%d\n", e->cursor.entered);
       break;
     case kWindowDrop:
       printf("kWindowDrop\n");
@@ -64,8 +65,7 @@ void DumpEventString(GWindowEvent *event) {
       printf("kWindowMove x=%d y=%d\n", e->pos.x, e->pos.y);
       break;
     case kWindowResize:
-      printf("kWindowResize width=%d height=%d\n",
-          e->size.width, e->size.height);
+      printf("kWindowResize width=%d height=%d\n", e->size.width, e->size.height);
       break;
     case kWindowFramebufferResize:
       printf("kWindowFramebufferResize\n");
@@ -111,20 +111,15 @@ void HandleEvent(GWindowEvent event) {
   switch (event.type) {
     case kWindowKey:
       switch (event.e.key.scancode) {
-        case 31: // o
-          window = gui_create_window(
-              &gui,
-              800, 600,
-              "proto3d",
-              NULL,
-              NULL);
+        case 31:  // o
+          window = gui_create_window(&gui, 800, 600, "proto3d", NULL, NULL);
           gui_set_window_pos(window, pos_x += 10, pos_y += 10);
           break;
-        case 12: // q
+        case 12:  // q
           if (event.window == main_window) {
             event.window->closed = true;
           } else {
-            // TODO: close 
+            // TODO: close
           }
           break;
       }
@@ -195,7 +190,7 @@ int main(int argc, char *argv[]) {
 #endif
 
   // Clear the window
-  glClearColor(1.0, 0.5, 0.0, 1.0); // white
+  glClearColor(1.0, 0.5, 0.0, 1.0);  // white
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   gl_swap_buffers(main_window);
 
@@ -212,9 +207,9 @@ int main(int argc, char *argv[]) {
     perror("ReadShaderSource");
     return 3;
   }
-  const char *sources_vert[] = { "#version 330\n#define VERTEX_SHADER\n", shader_source};
+  const char *sources_vert[] = {"#version 330\n#define VERTEX_SHADER\n", shader_source};
   shaders[0] = shader::Compile(GL_VERTEX_SHADER, 2, (const char **)sources_vert);
-  const char *sources_frag[] = { "#version 330\n#define FRAGMENT_SHADER\n", shader_source};
+  const char *sources_frag[] = {"#version 330\n#define FRAGMENT_SHADER\n", shader_source};
   shaders[1] = shader::Compile(GL_FRAGMENT_SHADER, 2, (const char **)sources_frag);
 
   // Link into a Program
@@ -243,6 +238,7 @@ int main(int argc, char *argv[]) {
   vao.Bind();
   vbo.Bind();
 
+  // clang-format off
   // put the three triangle verticies into the VBO
   GLfloat vertex_data[] = {
      // x    y     z      u    v
@@ -250,13 +246,15 @@ int main(int argc, char *argv[]) {
     -0.8f, -0.8f, 0.0f,  0.0f, 0.0f,
      0.8f, -0.8f, 0.0f,  1.0f, 0.0f
   };
+  // clang-format on
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
   PROTO3D_CHECK_GL_ERROR("glBufferData");
 
   // connect the xyz to the "vert" attribute of the vertex shader
   glEnableVertexAttribArray(program.AttribLocation("vert"));
   PROTO3D_CHECK_GL_ERROR("glEnableVertexAttribArray");
-  glVertexAttribPointer(program.AttribLocation("vert"), 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
+  glVertexAttribPointer(
+      program.AttribLocation("vert"), 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
   PROTO3D_CHECK_GL_ERROR("glVertexAttribPointer");
 
   // Load the texture into the triangle
@@ -281,14 +279,12 @@ int main(int argc, char *argv[]) {
   // connect the uv coords to the "vertTexCoord" attribute of the vertex
   // shader
   glEnableVertexAttribArray(program.AttribLocation("vertTexCoord"));
-  glVertexAttribPointer(
-      program.AttribLocation("vertTexCoord"),
-      2,
-      GL_FLOAT,
-      GL_TRUE,
-      5 * sizeof(GLfloat),
-      (const GLvoid*)(3 * sizeof(GLfloat)));
-
+  glVertexAttribPointer(program.AttribLocation("vertTexCoord"),
+                        2,
+                        GL_FLOAT,
+                        GL_TRUE,
+                        5 * sizeof(GLfloat),
+                        (const GLvoid *)(3 * sizeof(GLfloat)));
 
   program.Bind();
   vao.Bind();
@@ -299,7 +295,7 @@ int main(int argc, char *argv[]) {
 
   // Render the first frame
   FlushFrame();
-  
+
   do {
     gui_poll_events(&gui);
     gui_wait_events(&gui);
