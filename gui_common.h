@@ -1,5 +1,7 @@
-#ifndef GUI_COMMON_H
-#define GUI_COMMON_H
+// Copyright 2016-2017 Felipe Oliveira Carvalho
+
+#ifndef GUI_COMMON_H_
+#define GUI_COMMON_H_
 /// @file This header is included by all platform specific GUI headers.
 /// And contains the headers and implementation of common gui functions that
 /// work in any platform. COMMON_GUI_IMPLEMENTATION should be defined before
@@ -309,7 +311,7 @@ typedef struct GFramebufferConfig {
   int         depth_bits;
   int         stencil_bits;
   bool        double_buffer;
-  
+
   // For OpenGL 1.x and 2.x
   //         accum_red_bits;
   //         accum_green_bits;
@@ -318,9 +320,9 @@ typedef struct GFramebufferConfig {
   //         aux_buffers;
 
   bool        stereo;
-  int         samples; // TODO: check this
+  int         samples; // TODO(philix): check this
   // GLFWbool    s_rgb; // default on Mac OS X
- 
+
   // Platform-specific config
   // ...
 } GFramebufferConfig;
@@ -405,7 +407,7 @@ typedef enum {
 // Mouse actions
 typedef enum {
   kMouseActionClick,
-  // TODO: more mouse actions
+  // TODO(philix): more mouse actions
 } GMouseAction;
 // }}}
 
@@ -511,7 +513,7 @@ typedef struct {
 } GWindowEvent;
 
 typedef enum {
-  // TODO: monitor events
+  // TODO(philix): monitor events
   k_a_monitor_event,
 } GMonitorEventType;
 
@@ -621,7 +623,7 @@ typedef struct GMonitor {
     struct monitor_ns_s ns;
 #endif
 } GMonitor;
-// }}} 
+// }}}
 
 // Global GUI state {{{
 struct GlobalGui {
@@ -639,7 +641,7 @@ struct GlobalGui {
   uint64_t       timer_offset;
 
   void (*handle_event)(GWindowEvent event);
-  // TODO: unify GMonitorEvent and GWindowEvent
+  // TODO(philix): unify GMonitorEvent and GWindowEvent
   void (*handle_monitor_event)(GMonitorEvent);
 
   struct {
@@ -934,7 +936,7 @@ void gui_terminate(GlobalGui *gui) {
   gui->monitors      = NULL;
   gui->monitor_count = 0;
 
-  // TODO
+  // TODO(philix): gui_platform_terminate
   /* gui_platform_terminate(); */
 
   memset(gui, 0, sizeof(*gui));
@@ -1030,7 +1032,7 @@ void gui_input_monitor_change(GlobalGui *gui, char **error) {
       }
     }
 
-    // TODO: dipatch the monitor disconnected event
+    // TODO(philix): dipatch the monitor disconnected event
     /* if (gui->callbacks.monitor) */
     /*     gui->callbacks.monitor((GMonitor*) monitors[i], GLFW_DISCONNECTED); */
   }
@@ -1052,7 +1054,7 @@ void gui_input_monitor_change(GlobalGui *gui, char **error) {
       continue;
     }
 
-    // TODO: dispatch the monitor connected event
+    // TODO(philix): dispatch the monitor connected event
     /* if (gui->callbacks.monitor) */
     /*     gui->callbacks.monitor((GMonitor*) gui->monitors[i], GLFW_CONNECTED); */
   }
@@ -1590,7 +1592,7 @@ void gui_input_window_monitor_change(GWindow *window, GMonitor *monitor) {
 
 // Public window manipulation abstract API {{{
 
-// TODO: check how this is done in GLFW again
+// TODO(philix): check how this is done in GLFW again
 GWindow *gui_create_window(
     GlobalGui *gui, int width, int height, const char *title, GMonitor *monitor, char **error) {
   assert(title != NULL);
@@ -1783,8 +1785,7 @@ void gui_set_window_monitor(GWindow *window,
 // Public input abstract API {{{
 
 #if 0
-int gui_get_input_mode(GWindow *window, GWindowInputMode mode)
-{
+int gui_get_input_mode(GWindow *window, GWindowInputMode mode) {
   assert(window != NULL);
 
   switch (mode) {
@@ -1797,8 +1798,7 @@ int gui_get_input_mode(GWindow *window, GWindowInputMode mode)
   }
 }
 
-void gui_set_input_mode(GWindow *window, GWindowInputMode mode, int value)
-{
+void gui_set_input_mode(GWindow *window, GWindowInputMode mode, int value) {
   assert(window != NULL);
 
   switch (mode) {

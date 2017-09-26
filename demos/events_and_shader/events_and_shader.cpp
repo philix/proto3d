@@ -90,7 +90,7 @@ void DumpEventString(GWindowEvent *event) {
 
 void HandleEvent(GWindowEvent event) {
   static GWindowEventType last_event_type = kWindowNullEvent;
-  static char pending_newline = 0;
+  static char pending_newline             = 0;
   // Open new window at this position
   static int pos_x = 0, pos_y = 0;
 
@@ -208,9 +208,9 @@ int main(int argc, char *argv[]) {
     return 3;
   }
   const char *sources_vert[] = {"#version 330\n#define VERTEX_SHADER\n", shader_source};
-  shaders[0] = shader::Compile(GL_VERTEX_SHADER, 2, (const char **)sources_vert);
+  shaders[0]                 = shader::Compile(GL_VERTEX_SHADER, 2, (const char **)sources_vert);
   const char *sources_frag[] = {"#version 330\n#define FRAGMENT_SHADER\n", shader_source};
-  shaders[1] = shader::Compile(GL_FRAGMENT_SHADER, 2, (const char **)sources_frag);
+  shaders[1]                 = shader::Compile(GL_FRAGMENT_SHADER, 2, (const char **)sources_frag);
 
   // Link into a Program
   //
