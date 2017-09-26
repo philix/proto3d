@@ -1,7 +1,7 @@
-cmake_minimum_required (VERSION 3.1)   # First version with CMAKE_CXX_STANDARD.
+cmake_minimum_required(VERSION 3.1)   # First version with CMAKE_CXX_STANDARD.
 project(proto3d)
 
-set (CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
 
 # Maximum warnings level minus some
 set(CMAKE_CXX_FLAGS
@@ -9,6 +9,14 @@ set(CMAKE_CXX_FLAGS
 
 # Extra flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_EXTRA_FLAGS}")
+
+# proto3d
+# =======
+# Defines the following variables
+#
+# - PROTO3D_INCLUDE_DIRS
+# - PROTO3D_LIBRARIES
+# - PROTO3D_DEFINITIONS
 
 # Passing -fno-exceptions to the compiler is not possible yet due to some
 # reliance on STL.
@@ -21,16 +29,15 @@ OPTION(PROTO3D_STB_IMAGE
 OPTION(PROTO3D_DEMOS
   "Also build the demos in demos/" ON)
 
-# Add / to the include path
-include_directories(${PROJECT_SOURCE_DIR})
+set(PROTO3D_INCLUDE_DIRS ${PROJECT_SOURCE_DIR})
 
 # Add .cpp files to the static library
 if(PROTO3D_STB_IMAGE)
-  add_definitions(-DPROTO3D_USE_STB)
+  list(APPEND PROTO3D_DEFINITIONS -DPROTO3D_USE_STB)
 endif(PROTO3D_STB_IMAGE)
 
 if(PROTO3D_EXCEPTIONS)
-  add_definitions(-DPROTO3D_USE_EXCEPTIONS)
+  list(APPEND PROTO3D_DEFINITIONS -DPROTO3D_USE_EXCEPTIONS)
 endif()
 
 # Use pkg-config to find some libraries
@@ -47,8 +54,8 @@ endif()
 # Include glm
 if(PROTO3D_GLM)
   # GLM is header-only
-  include_directories(glm)
-  add_definitions(-DPROTO3D_USE_GLM)
+  list(APPEND PROTO3D_INCLUDE_DIRS glm)
+  list(APPEND PROTO3D_DEFINITIONS -DPROTO3D_USE_GLM)
 endif(PROTO3D_GLM)
 
 # Set up library and include paths
@@ -70,6 +77,16 @@ list(APPEND APPLE_LIBRARIES "${COCOA_FRAMEWORK}"
                           "${CORE_FOUNDATION_FRAMEWORK}"
                           "${CORE_VIDEO_FRAMEWORK}"
                           "${CARBON_FRAMEWORK}")
+list(APPEND PROTO3D_LIBRARIES ${APPLE_LIBRARIES})
+
+macro(TargetLinkProto3D target)
+  target_include_directories(${target} PUBLIC ${PROTO3D_INCLUDE_DIRS})
+  target_link_libraries(${target} PUBLIC ${PROTO3D_LIBRARIES})
+  target_compile_definitions(${target} PUBLIC ${PROTO3D_DEFINITIONS})
+endmacro()
+
+# demos
+# =====
 
 # Include demos/CMakeLists.txt after setting everything we need
 if(PROTO3D_DEMOS)
