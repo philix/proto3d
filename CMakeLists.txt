@@ -83,6 +83,22 @@ macro(TargetLinkProto3D target)
   target_compile_definitions(${target} PUBLIC ${PROTO3D_DEFINITIONS})
 endmacro()
 
+# gui
+# ===
+# Defines the following variables
+#
+# - GUI_INCLUDE_DIRS
+# - GUI_LIBRARIES
+
+add_library(gui gui_cocoa.m)
+set(GUI_INCLUDE_DIRS ${PROJECT_SOURCE_DIR})
+set(GUI_LIBRARIES gui)
+
+macro(TargetLinkGui target)
+  target_include_directories(${target} PUBLIC ${GUI_INCLUDE_DIRS})
+  target_link_libraries(${target} PUBLIC ${GUI_LIBRARIES})
+endmacro()
+
 # demos
 # =====
 
