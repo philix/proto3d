@@ -64,22 +64,27 @@ web = urllib2.urlopen(GLCOREARB_URL, context=context)
 # Parse function names from glcorearb.h
 print('Parsing glcorearb.h...')
 glcorearb_header_lines = []
-proc_names = []
-pattern = re.compile(r'GLAPI.*APIENTRY\s+(\w+)')
+procs = []
+line_pattern = re.compile(r'GLAPI (.*?)APIENTRY\s+(\w+)\s*\((.*)\)')
+last_id_pattern = re.compile(r'.*?(\w+)(\[\d*\])?$')
 for line in web:
     glcorearb_header_lines.append(line)
-    m = pattern.match(line)
+    m = line_pattern.match(line)
     if m:
-        proc_names.append(m.group(1))
-
-#proc_names.sort()
-
-def proc_t(proc_name):
-    return {
-        'p': proc_name,
-        'p_s': 'proto3d' + proc_name[2:],
-        'p_t': 'PFN' + proc_name.upper() + 'PROC'
-    }
+        ret_type = m.group(1)
+        name = m.group(2)
+        params_str = m.group(3)
+        params = map(lambda s: s.strip(), params_str.split(','))
+        param_names = filter(
+            lambda s: s != 'void',
+            map(lambda s: last_id_pattern.match(s).group(1), params))
+        procs.append({
+          'name': m.group(2),
+          'params_str': params_str,
+          'param_names': param_names,
+          'ret_type': ret_type,
+          'type': 'PFN' + name.upper() + 'PROC'
+        })
 
 # Generate proto3d_glcorearb.h
 print('Generating ' + dest_path + '...')
@@ -114,8 +119,8 @@ Proto3dGlProc Proto3dGlGetProcAddress(const char *proc);
 
 // OpenGL function pointer declarations {{{
 ''')
-for proc_name in proc_names:
-    f.write('extern {0[p_t]: <52} {0[p]};\n'.format(proc_t(proc_name)).encode('utf-8'))
+for proc in procs:
+    f.write('extern {0[type]: <52} {0[name]};\n'.format(proc).encode('utf-8'))
 f.write(b'// }}} End OpenGL function pointer declarations\n')
 
 f.write(br'''
@@ -135,15 +140,15 @@ extern "C" {
 
 // OpenGL function pointers {{{
 ''')
-for proc_name in proc_names:
-    f.write('{0[p_t]: <52} {0[p]};\n'.format(proc_t(proc_name)).encode('utf-8'))
+for proc in procs:
+    f.write('{0[type]: <52} {0[name]};\n'.format(proc).encode('utf-8'))
 f.write(br'''// }}} End OpenGL function pointers
 
 void Proto3dGlLoadAllCoreProfileProcs(void) {
 // {{{
 ''')
-for proc_name in proc_names:
-    f.write('  {0[p]} = ({0[p_t]})Proto3dGlGetProcAddress("{0[p]}");\n'.format(proc_t(proc_name)).encode('utf-8'))
+for proc in procs:
+    f.write('  {0[name]} = ({0[type]})Proto3dGlGetProcAddress("{0[name]}");\n'.format(proc).encode('utf-8'))
 f.write('// }}}\n')
 f.write(br'''}
 
