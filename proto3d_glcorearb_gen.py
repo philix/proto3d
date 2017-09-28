@@ -64,21 +64,21 @@ web = urllib2.urlopen(GLCOREARB_URL, context=context)
 # Parse function names from glcorearb.h
 print('Parsing glcorearb.h...')
 glcorearb_header_lines = []
-procs = []
+proc_names = []
 pattern = re.compile(r'GLAPI.*APIENTRY\s+(\w+)')
 for line in web:
     glcorearb_header_lines.append(line)
     m = pattern.match(line)
     if m:
-        procs.append(m.group(1))
+        proc_names.append(m.group(1))
 
-#procs.sort()
+#proc_names.sort()
 
-def proc_t(proc):
+def proc_t(proc_name):
     return {
-        'p': proc,
-        'p_s': 'proto3d' + proc[2:],
-        'p_t': 'PFN' + proc.upper() + 'PROC'
+        'p': proc_name,
+        'p_s': 'proto3d' + proc_name[2:],
+        'p_t': 'PFN' + proc_name.upper() + 'PROC'
     }
 
 # Generate proto3d_glcorearb.h
@@ -114,8 +114,8 @@ Proto3dGlProc Proto3dGlGetProcAddress(const char *proc);
 
 // OpenGL function pointer declarations {{{
 ''')
-for proc in procs:
-    f.write('extern {0[p_t]: <52} {0[p]};\n'.format(proc_t(proc)).encode('utf-8'))
+for proc_name in proc_names:
+    f.write('extern {0[p_t]: <52} {0[p]};\n'.format(proc_t(proc_name)).encode('utf-8'))
 f.write(b'// }}} End OpenGL function pointer declarations\n')
 
 f.write(br'''
@@ -135,15 +135,15 @@ extern "C" {
 
 // OpenGL function pointers {{{
 ''')
-for proc in procs:
-    f.write('{0[p_t]: <52} {0[p]};\n'.format(proc_t(proc)).encode('utf-8'))
+for proc_name in proc_names:
+    f.write('{0[p_t]: <52} {0[p]};\n'.format(proc_t(proc_name)).encode('utf-8'))
 f.write(br'''// }}} End OpenGL function pointers
 
 void Proto3dGlLoadAllCoreProfileProcs(void) {
 // {{{
 ''')
-for proc in procs:
-    f.write('  {0[p]} = ({0[p_t]})Proto3dGlGetProcAddress("{0[p]}");\n'.format(proc_t(proc)).encode('utf-8'))
+for proc_name in proc_names:
+    f.write('  {0[p]} = ({0[p_t]})Proto3dGlGetProcAddress("{0[p]}");\n'.format(proc_t(proc_name)).encode('utf-8'))
 f.write('// }}}\n')
 f.write(br'''}
 
