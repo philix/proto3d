@@ -248,14 +248,11 @@ int main(int argc, char *argv[]) {
   };
   // clang-format on
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-  PROTO3D_CHECK_GL_ERROR("glBufferData");
 
   // connect the xyz to the "vert" attribute of the vertex shader
   glEnableVertexAttribArray(program.AttribLocation("vert"));
-  PROTO3D_CHECK_GL_ERROR("glEnableVertexAttribArray");
   glVertexAttribPointer(
       program.AttribLocation("vert"), 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
-  PROTO3D_CHECK_GL_ERROR("glVertexAttribPointer");
 
   // Load the texture into the triangle
   auto image = stb::Image::CreateFromFile((base_relative_path + "/hazard.png").c_str());
