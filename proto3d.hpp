@@ -133,37 +133,6 @@ stbi_uc *stbi_load(const char *, int *, int *, int *, int);
 // }}}
 // clang-format on
 
-// clang-format off
-// Macro for logging that takes printf-style arguments.
-// This version requires <cstdio>, but it can be defined differently before
-// including proto3d headers.
-#ifndef PROTO3D_TRACE
-#include <cstdio>  // NOLINT
-#define PROTO3D_TRACE(...)      \
-  fprintf(stderr, __VA_ARGS__); \
-  fflush(stderr)
-#endif
-
-#ifndef PROTO3D_CHECK_GL_ERROR
-# ifdef NDEBUG
-#  define PROTO3D_CHECK_GL_ERROR(gl_proc_name_str)
-# else
-namespace proto3d { namespace gl { const char *LastErrorString(); } };
-#  define PROTO3D_CHECK_GL_ERROR(gl_proc_name_str)                \
-  {                                                               \
-    const char *_last_error_str = proto3d::gl::LastErrorString(); \
-    if (_last_error_str != nullptr) {                             \
-      PROTO3D_TRACE("OpenGL error:%s:%d: %s is set after %s.\n",  \
-                    __FILE__,                                     \
-                    __LINE__,                                     \
-                    _last_error_str,                              \
-                    (gl_proc_name_str));                          \
-    }                                                             \
-  }
-# endif
-#endif
-// clang-format on
-
 #ifdef PROTO3D_USE_GL_VERSION_4_3
 extern "C" {
 void proto3d_DebugMessageCallbackImpl(GLenum source,
@@ -1383,29 +1352,7 @@ namespace proto3d {
 
 namespace gl {
 
-const char *LastErrorString() {
-  GLenum error = glGetError();
-  switch (error) {
-    case GL_NO_ERROR:
-      return nullptr;
-    case GL_INVALID_ENUM:
-      return "GL_INVALID_ENUM";
-    case GL_INVALID_VALUE:
-      return "GL_INVALID_VALUE";
-    case GL_INVALID_OPERATION:
-      return "GL_INVALID_OPERATION";
-    case GL_INVALID_FRAMEBUFFER_OPERATION:
-      return "GL_INVALID_FRAMEBUFFER_OPERATION";
-    case GL_OUT_OF_MEMORY:
-      return "GL_OUT_OF_MEMORY";
-    case GL_STACK_UNDERFLOW:
-      return "GL_STACK_UNDERFLOW";
-    case GL_STACK_OVERFLOW:
-      return "GL_STACK_OVERFLOW";
-    default:
-      return "unknown error type";
-  }
-}
+const char *LastErrorString() { return Proto3dGlLastErrorString(); }
 
 const char *FramebufferStatusString() {
   switch (glCheckFramebufferStatus(GL_FRAMEBUFFER)) {

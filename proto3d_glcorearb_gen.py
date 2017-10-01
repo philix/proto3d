@@ -113,9 +113,10 @@ typedef void (*Proto3dGlProc)(void);
 void Proto3dOpenLibGl(void);
 void Proto3dCloseLibGl(void);
 void Proto3dGlLoadAllCoreProfileProcs(void);
-int  Proto3dOpenLibGlAndLoadCoreProfile(void);
-int  Proto3dGlLoadedVersion(GLint *major, GLint *minor);
+int Proto3dOpenLibGlAndLoadCoreProfile(void);
+int Proto3dGlLoadedVersion(GLint *major, GLint *minor);
 Proto3dGlProc Proto3dGlGetProcAddress(const char *proc);
+const char *Proto3dGlLastErrorString();
 
 // OpenGL function pointer declarations {{{
 ''')
@@ -133,6 +134,34 @@ print('Generating loader API implementation...')
 f.write(br'''
 #if defined(PROTO3D_GLCOREARB_IMPLEMENTATION) && !defined(PROTO3D_GLCOREARB_IMPLEMENTATION_DONE)
 # define PROTO2D_GLCOREARB_IMPLEMENTATION_DONE
+
+// Macro for logging that takes printf-style arguments.
+// This version requires <cstdio>, but it can be defined differently before
+// including proto3d headers.
+#ifndef PROTO3D_TRACE
+#include <cstdio>  // NOLINT
+#define PROTO3D_TRACE(...)      \
+  fprintf(stderr, __VA_ARGS__); \
+  fflush(stderr)
+#endif
+
+#ifndef PROTO3D_CHECK_GL_ERROR
+# ifdef NDEBUG
+#  define PROTO3D_CHECK_GL_ERROR(gl_proc_name_str)
+# else
+#  define PROTO3D_CHECK_GL_ERROR(gl_proc_name_str)                \
+  {                                                               \
+    const char *_last_error_str = Proto3dGlLastErrorString();     \
+    if (_last_error_str != nullptr) {                             \
+      PROTO3D_TRACE("OpenGL error:%s:%d: %s is set after %s.\n",  \
+                    __FILE__,                                     \
+                    __LINE__,                                     \
+                    _last_error_str,                              \
+                    (gl_proc_name_str));                          \
+    }                                                             \
+  }
+# endif
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -289,6 +318,31 @@ int Proto3dOpenLibGlAndLoadCoreProfile(void)
   }
   return major < 3 ? -1 : 0;
 }
+
+const char *Proto3dGlLastErrorString() {
+  GLenum error = glGetError();
+  switch (error) {
+    case GL_NO_ERROR:
+      return nullptr;
+    case GL_INVALID_ENUM:
+      return "GL_INVALID_ENUM";
+    case GL_INVALID_VALUE:
+      return "GL_INVALID_VALUE";
+    case GL_INVALID_OPERATION:
+      return "GL_INVALID_OPERATION";
+    case GL_INVALID_FRAMEBUFFER_OPERATION:
+      return "GL_INVALID_FRAMEBUFFER_OPERATION";
+    case GL_OUT_OF_MEMORY:
+      return "GL_OUT_OF_MEMORY";
+    case GL_STACK_UNDERFLOW:
+      return "GL_STACK_UNDERFLOW";
+    case GL_STACK_OVERFLOW:
+      return "GL_STACK_OVERFLOW";
+    default:
+      return "unknown error type";
+  }
+}
+
 
 #ifdef __cplusplus
 };
