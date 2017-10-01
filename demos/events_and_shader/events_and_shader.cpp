@@ -4,13 +4,13 @@
 #include <string>
 
 #define GUI_COMMON_IMPLEMENTATION
-#include "../../gui_common.h"
+#include "gui_common.h"
 #define PROTO3D_GLCOREARB_IMPLEMENTATION
-#include "../../proto3d_glcorearb.h"
+#include "proto3d_glcorearb.h"
 #define PROTO3D_IMPLEMENTATION
-#include "../../proto3d.hpp"
+#include "proto3d.hpp"
 #define STB_IMAGE_IMPLEMENTATION
-#include "../../stb_image.h"
+#include "stb_image.h"
 
 using namespace std;
 using namespace proto3d;
