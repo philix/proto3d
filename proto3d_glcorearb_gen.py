@@ -93,6 +93,19 @@ f.write(INCLUDE_HELP)
 f.write(br'''#ifndef PROTO3D_GLCOREARB_H_
 #define PROTO3D_GLCOREARB_H_
 
+// In Debug mode we need the prototypes since we generate a debug
+// implementation of all gl* functions.
+#ifndef NDEBUG
+# define GL_GLEXT_PROTOTYPES
+#else
+// API aliases {{{
+''')
+for proc in procs:
+    f.write('# define {0[name]} _{0[name]}\n'.format(proc).encode('utf-8'))
+f.write(br'''
+// }}} End of API aliases
+#endif
+
 // Begin glcorearb.h (https://www.opengl.org/registry/api/GL/glcorearb.h) {{{
 ''')
 f.write(''.join(glcorearb_header_lines))
@@ -121,7 +134,7 @@ const char *Proto3dGlLastErrorString();
 // OpenGL function pointer declarations {{{
 ''')
 for proc in procs:
-    f.write('extern {0[type]: <52} {0[name]};\n'.format(proc).encode('utf-8'))
+    f.write('extern {0[type]: <52} _{0[name]};\n'.format(proc).encode('utf-8'))
 f.write(b'// }}} End OpenGL function pointer declarations\n')
 
 f.write(br'''
@@ -170,14 +183,33 @@ extern "C" {
 // OpenGL function pointers {{{
 ''')
 for proc in procs:
-    f.write('{0[type]: <52} {0[name]};\n'.format(proc).encode('utf-8'))
-f.write(br'''// }}} End OpenGL function pointers
+    f.write('{0[type]: <52} _{0[name]};\n'.format(proc).encode('utf-8'))
+f.write(b'// }}} End OpenGL function pointers\n\n')
 
+f.write('#ifndef NDEBUG\n')
+f.write('// Debug GL API implementations {{{\n')
+for proc in procs:
+    f.write('{0[ret_type]}{0[name]}({0[params_str]}) {{\n'.format(proc).encode('utf-8'))
+    arguments = ', '.join(proc['param_names'])
+    if proc['ret_type'] == 'void ':
+        f.write('  _{0[name]}({1});\n'.format(proc, arguments).encode('utf-8'))
+        if proc['name'] != 'glGetError':
+            f.write('  PROTO3D_CHECK_GL_ERROR("{0[name]}");\n'.format(proc).encode('utf-8'))
+    else:
+        f.write('  {0[ret_type]}ret = _{0[name]}({1});\n'.format(proc, arguments).encode('utf-8'))
+        if proc['name'] != 'glGetError':
+            f.write('  PROTO3D_CHECK_GL_ERROR("{0[name]}");\n'.format(proc).encode('utf-8'))
+        f.write('  return ret;\n')
+    f.write('}\n')
+f.write('// }}} End of Debug GL API implementations\n')
+f.write('#endif  // !NDEBUG\n')
+
+f.write(br'''
 void Proto3dGlLoadAllCoreProfileProcs(void) {
 // {{{
 ''')
 for proc in procs:
-    f.write('  {0[name]} = ({0[type]})Proto3dGlGetProcAddress("{0[name]}");\n'.format(proc).encode('utf-8'))
+    f.write('  _{0[name]} = ({0[type]})Proto3dGlGetProcAddress("{0[name]}");\n'.format(proc).encode('utf-8'))
 f.write('// }}}\n')
 f.write(br'''}
 
@@ -310,7 +342,7 @@ int Proto3dOpenLibGlAndLoadCoreProfile(void)
   Proto3dOpenLibGl();
   Proto3dGlLoadAllCoreProfileProcs();
   Proto3dCloseLibGl();
-  
+
   GLint major = 0;
   GLint minor = 0;
   if (Proto3dGlLoadedVersion(&major, &minor) < 0) {
