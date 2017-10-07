@@ -538,6 +538,31 @@ struct VertexPointerFormat {
 };
 
 /// OpenGL Vertex Array Objects
+///
+/// A Vertex Array Object (VAO) is a container for a set of Vertex Buffer
+/// Objects (VBO) and their state.
+///
+/// The usage patter is:
+///
+///  - During scene initialization:
+///    1. Bind() the VAO
+///    2. Set vertex data state for a visual object using VBOs
+///    3. Unbind() the VAO
+///
+///  - In the render function:
+///    1. Bind() the VAO to restore all the of the vertex data state remembered
+///       by the VAO
+///    2. Call a glDraw*() function
+///    3. Unbind() the VAO
+///
+/// A Vertex Array Object (VAO) is an OpenGL container object that encapsulates
+/// the state needed to specify per-vertex attribute data to the OpenGL
+/// pipeline. To put it another way, a VAO remembers the states of buffer
+/// objects (see QOpenGLBuffer) and their associated state (e.g. vertex
+/// attribute divisors). This allows a very easy and efficient method of
+/// switching between OpenGL buffer states for rendering different "objects" in
+/// a scene. The QOpenGLVertexArrayObject class is a thin wrapper around an
+/// OpenGL VAO.
 class VAO {
  public:
   GLuint id;
