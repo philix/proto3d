@@ -234,12 +234,10 @@ int main(int argc, char *argv[]) {
 
   // Load the triangle
   vao.Create();
-  vbo.Create();
   vao.Bind();
+  vbo.Create();
   vbo.Bind();
-
   // clang-format off
-  // put the three triangle verticies into the VBO
   GLfloat vertex_data[] = {
      // x    y     z      u    v
      0.0f,  0.8f, 0.0f,  0.5f, 1.0f,
@@ -247,6 +245,8 @@ int main(int argc, char *argv[]) {
      0.8f, -0.8f, 0.0f,  1.0f, 0.0f
   };
   // clang-format on
+  vbo.LoadBufferData(vertex_data, sizeof(vertex_data));
+
   VertexPointerFormat vertex_ptr_format(3);
   vertex_ptr_format.stride = 5 * sizeof(GLfloat);
 
@@ -255,11 +255,8 @@ int main(int argc, char *argv[]) {
   uv_ptr_format.stride     = 5 * sizeof(GLfloat);
   uv_ptr_format.offset     = 3 * sizeof(GLfloat);
 
-  vbo.LoadBufferData(vertex_data, sizeof(vertex_data));
-
   // connect the xyz to the "vert" attribute of the vertex shader
-  auto vertex_attrib_location = vao.EnableArray(program.AttribLocation("vert"));
-  vao.SetArrayFormat(vertex_attrib_location, vertex_ptr_format);
+  vao.AddArray(program.AttribLocation("vert"), vbo, vertex_ptr_format);
 
   // Load the texture into the triangle
   auto image = stb::Image::CreateFromFile((base_relative_path + "/hazard.png").c_str());
@@ -282,12 +279,9 @@ int main(int argc, char *argv[]) {
 
   // connect the uv coords to the "vertTexCoord" attribute of the vertex
   // shader
-  auto vert_tex_coord_location = vao.EnableArray(program.AttribLocation("vertTexCoord"));
-  vao.SetArrayFormat(vert_tex_coord_location, uv_ptr_format);
+  vao.AddArray(program.AttribLocation("vertTexCoord"), vbo, uv_ptr_format);
 
   program.Bind();
-  vao.Bind();
-  texture.Bind();
 
   // Attach our even handler
   gui.handle_event = HandleEvent;

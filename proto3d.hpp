@@ -682,17 +682,43 @@ class VAO {
                           (const GLvoid *)format.offset);
   }
 
-  GLint EnableArray(GLint index) {
+  void EnableArray(GLint index) {
     assert(Bound());
     assert(index < MaxNumberOfArrays());
     glEnableVertexAttribArray(index);
-    return index;
   }
 
-  GLint DisableArray(GLint index) {
+  void DisableArray(GLint index) {
     assert(Bound());
     glDisableVertexAttribArray(index);
-    return index;
+  }
+
+  void AddArray(GLint index, const VBO vbo, const VertexPointerFormat &format) {
+    assert(vbo.Bound());
+    SetArrayFormat(index, format);
+    EnableArray(index);
+  }
+
+  VBO AddArray(GLint index,
+               const GLvoid *data,
+               GLsizeiptr size,
+               GLenum usage,
+               const VertexPointerFormat &format) {
+    assert(VBO::CurrentBinding().id == 0 && "No VBO should be bound before VBO::AddArray()");
+    VBO vbo;
+    vbo.Create();
+    vbo.Bind();
+    vbo.LoadBufferData(data, size, usage);
+    AddArray(index, vbo, format);
+    vbo.Unbind();
+    return vbo;
+  }
+
+  VBO AddArray(GLint index,
+               const GLvoid *data,
+               GLsizeiptr size,
+               const VertexPointerFormat &format) {
+    return AddArray(index, data, size, GL_STATIC_DRAW, format);
   }
 };
 
