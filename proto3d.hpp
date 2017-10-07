@@ -520,7 +520,7 @@ class VAO {
  public:
   GLuint id;
 
-  VAO(GLuint _id) : id(_id) {}  // NOLINT
+  VAO(GLuint id) : id(id) {}  // NOLINT
 
   VAO() = default;
 
@@ -551,7 +551,7 @@ class VBO {
  public:
   GLuint id;
 
-  VBO(GLuint _id) : id(_id) {}  // NOLINT
+  VBO(GLuint id) : id(id) {}  // NOLINT
 
   VBO() = default;
 
@@ -609,7 +609,7 @@ class Shader {
 
   Shader() = default;
 
-  Shader(GLuint _id) : id(_id) {}  // NOLINT
+  Shader(GLuint id) : id(id) {}  // NOLINT
 
   /// Create the Shader in OpenGL memory.
   ///
@@ -707,7 +707,7 @@ class Program {
 
   Program() = default;
 
-  Program(GLuint _id) : id(_id) {}  // NOLINT
+  Program(GLuint id) : id(id) {}  // NOLINT
 
   void Create() { id = glCreateProgram(); }
 
@@ -1027,7 +1027,7 @@ class Texture {
 
   Texture() = default;
 
-  Texture(GLuint _id) : id(_id) {}  // NOLINT
+  Texture(GLuint id) : id(id) {}  // NOLINT
 
   void Gen() { glGenTextures(1, &id); }
 
