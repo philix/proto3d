@@ -515,6 +515,28 @@ void CheckLeaks();
 
 // OpenGL Objects {{{
 
+/// Vertex data layout parameters used to describe VBOs.
+/// Pointer format data gets stored in VAOs.
+struct VertexPointerFormat {
+  GLint vertex_size;
+  GLenum comp_type;
+  GLboolean normalized;
+  GLsizei stride;
+  GLintptr offset;
+
+  VertexPointerFormat()
+      : vertex_size(4), comp_type(GL_FLOAT), normalized(GL_FALSE), stride(0), offset(0) {}
+
+  explicit VertexPointerFormat(GLint vertex_size) : VertexPointerFormat(vertex_size, GL_FLOAT) {}
+
+  VertexPointerFormat(GLint vertex_size, GLenum comp_type)
+      : vertex_size(vertex_size),
+        comp_type(comp_type),
+        normalized(GL_FALSE),
+        stride(0),
+        offset(0) {}
+};
+
 /// OpenGL Vertex Array Objects
 class VAO {
  public:
@@ -549,6 +571,28 @@ class VAO {
     GLint current_vao;
     glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
     return this->id && this->id == (GLuint)current_vao;
+  }
+
+  void SetArrayFormat(GLint index, const VertexPointerFormat &format) {
+    assert(Bound());
+    glVertexAttribPointer(index,
+                          format.vertex_size,
+                          format.comp_type,
+                          format.normalized,
+                          format.stride,
+                          (const GLvoid *)format.offset);
+  }
+
+  GLint EnableArray(GLint index) {
+    assert(Bound());
+    glEnableVertexAttribArray(index);
+    return index;
+  }
+
+  GLint DisableArray(GLint index) {
+    assert(Bound());
+    glDisableVertexAttribArray(index);
+    return index;
   }
 };
 
@@ -599,6 +643,16 @@ class VBO {
     GLint current_vbo;
     glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &current_vbo);
     return this->id && this->id == (GLuint)current_vbo;
+  }
+
+  void LoadBufferData(const GLvoid *data, GLsizeiptr size) {
+    assert(Bound());
+    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+  }
+
+  void LoadBufferData(const GLvoid *data, GLsizeiptr size, GLenum usage) {
+    assert(Bound());
+    glBufferData(GL_ARRAY_BUFFER, size, data, usage);
   }
 };
 
