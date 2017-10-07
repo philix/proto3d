@@ -544,7 +544,7 @@ class VBO {
 
   VBO(GLuint id) : id(id) {}  // NOLINT
 
-  VBO() = default;
+  VBO() : id(0) {}
 
   void Create() {
     assert(id == 0);
@@ -633,7 +633,7 @@ class VAO {
 
   VAO(GLuint id) : id(id) {}  // NOLINT
 
-  VAO() = default;
+  VAO() : id(0) {}
 
   void Create() {
     assert(id == 0);
