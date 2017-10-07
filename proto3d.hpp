@@ -537,6 +537,66 @@ struct VertexPointerFormat {
         offset(0) {}
 };
 
+/// OpenGL Vertex Buffer Objects
+class VBO {
+ public:
+  GLuint id;
+
+  VBO(GLuint id) : id(id) {}  // NOLINT
+
+  VBO() = default;
+
+  void Create() {
+    assert(id == 0);
+    glGenBuffers(1, &id);
+  }
+
+  void Delete() {
+    assert(id != 0);
+    glDeleteBuffers(1, &id);
+  }
+
+  void Bind() const {
+    assert(id != 0);
+    glBindBuffer(GL_ARRAY_BUFFER, id);
+  }
+
+  void Unbind() const {
+    assert(id != 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
+
+  bool Bound() const {
+    assert(id != 0);
+    GLint current_vbo;
+    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &current_vbo);
+    return this->id && this->id == (GLuint)current_vbo;
+  }
+
+  void LoadBufferData(const GLvoid *data, GLsizeiptr size) {
+    assert(Bound());
+    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+  }
+
+  void LoadBufferData(const GLvoid *data, GLsizeiptr size, GLenum usage) {
+    assert(Bound());
+    glBufferData(GL_ARRAY_BUFFER, size, data, usage);
+  }
+};
+
+void Create(VBO *vbo_arr, GLuint count);
+void Delete(VBO *vbo_arr, GLuint count);
+
+#ifdef PROTO3D_IMPLEMENTATION
+void Create(VBO *vbo_arr, GLuint count) {
+  glGenBuffers(count, reinterpret_cast<GLuint *>(vbo_arr));
+}
+
+void Delete(VBO *vbo_arr, GLuint count) {
+  glDeleteBuffers(count, reinterpret_cast<GLuint *>(vbo_arr));
+}
+#endif  // PROTO3D_IMPLEMENTATION
+
 /// OpenGL Vertex Array Objects
 ///
 /// A Vertex Array Object (VAO) is a container for a set of Vertex Buffer
@@ -638,66 +698,6 @@ void Create(VAO *vao_arr, GLuint count) {
 
 void Delete(VAO *vao_arr, GLuint count) {
   glDeleteVertexArrays(count, reinterpret_cast<GLuint *>(vao_arr));
-}
-#endif  // PROTO3D_IMPLEMENTATION
-
-/// OpenGL Vertex Buffer Objects
-class VBO {
- public:
-  GLuint id;
-
-  VBO(GLuint id) : id(id) {}  // NOLINT
-
-  VBO() = default;
-
-  void Create() {
-    assert(id == 0);
-    glGenBuffers(1, &id);
-  }
-
-  void Delete() {
-    assert(id != 0);
-    glDeleteBuffers(1, &id);
-  }
-
-  void Bind() const {
-    assert(id != 0);
-    glBindBuffer(GL_ARRAY_BUFFER, id);
-  }
-
-  void Unbind() const {
-    assert(id != 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-  }
-
-  bool Bound() const {
-    assert(id != 0);
-    GLint current_vbo;
-    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &current_vbo);
-    return this->id && this->id == (GLuint)current_vbo;
-  }
-
-  void LoadBufferData(const GLvoid *data, GLsizeiptr size) {
-    assert(Bound());
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-  }
-
-  void LoadBufferData(const GLvoid *data, GLsizeiptr size, GLenum usage) {
-    assert(Bound());
-    glBufferData(GL_ARRAY_BUFFER, size, data, usage);
-  }
-};
-
-void Create(VBO *vbo_arr, GLuint count);
-void Delete(VBO *vbo_arr, GLuint count);
-
-#ifdef PROTO3D_IMPLEMENTATION
-void Create(VBO *vbo_arr, GLuint count) {
-  glGenBuffers(count, reinterpret_cast<GLuint *>(vbo_arr));
-}
-
-void Delete(VBO *vbo_arr, GLuint count) {
-  glDeleteBuffers(count, reinterpret_cast<GLuint *>(vbo_arr));
 }
 #endif  // PROTO3D_IMPLEMENTATION
 // }}} END of OpenGL objects
