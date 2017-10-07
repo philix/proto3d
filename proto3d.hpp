@@ -573,6 +573,12 @@ class VAO {
     return this->id && this->id == (GLuint)current_vao;
   }
 
+  static GLint MaxNumberOfArrays() {
+    GLint max_vertex_attribs;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &max_vertex_attribs);
+    return max_vertex_attribs;
+  }
+
   void SetArrayFormat(GLint index, const VertexPointerFormat &format) {
     assert(Bound());
     glVertexAttribPointer(index,
@@ -585,6 +591,7 @@ class VAO {
 
   GLint EnableArray(GLint index) {
     assert(Bound());
+    assert(index < MaxNumberOfArrays());
     glEnableVertexAttribArray(index);
     return index;
   }
