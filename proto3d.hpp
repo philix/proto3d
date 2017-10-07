@@ -524,13 +524,32 @@ class VAO {
 
   VAO() = default;
 
-  void Create() { glGenVertexArrays(1, &id); }
+  void Create() {
+    assert(id == 0);
+    glGenVertexArrays(1, &id);
+  }
 
-  void Delete() { glDeleteVertexArrays(1, &id); }
+  void Delete() {
+    assert(id != 0);
+    glDeleteVertexArrays(1, &id);
+  }
 
-  void Bind() const { glBindVertexArray(id); }
+  void Bind() const {
+    assert(id != 0);
+    glBindVertexArray(id);
+  }
 
-  void Unbind() const { glBindVertexArray(0); }
+  void Unbind() const {
+    assert(Bound());
+    glBindVertexArray(0);
+  }
+
+  bool Bound() const {
+    assert(id != 0);
+    GLint current_vao;
+    glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
+    return this->id && this->id == (GLuint)current_vao;
+  }
 };
 
 void Create(VAO *vao_arr, GLuint count);
@@ -555,17 +574,42 @@ class VBO {
 
   VBO() = default;
 
-  void Create() { glGenBuffers(1, &id); }
+  void Create() {
+    assert(id == 0);
+    glGenBuffers(1, &id);
+  }
 
-  void Delete() { glDeleteBuffers(1, &id); }
+  void Delete() {
+    assert(id != 0);
+    glDeleteBuffers(1, &id);
+  }
 
-  void Bind(GLenum target) const { glBindBuffer(target, id); }
+  void Bind(GLenum target) const {
+    assert(id != 0);
+    glBindBuffer(target, id);
+  }
 
-  void Unbind(GLenum target) { glBindBuffer(target, 0); }
+  void Unbind(GLenum target) const {
+    assert(Bound());
+    glBindBuffer(target, 0);
+  }
 
-  void Bind() const { glBindBuffer(GL_ARRAY_BUFFER, id); }
+  void Bind() const {
+    assert(id != 0);
+    glBindBuffer(GL_ARRAY_BUFFER, id);
+  }
 
-  void Unbind() const { glBindBuffer(GL_ARRAY_BUFFER, 0); }
+  void Unbind() const {
+    assert(id != 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  }
+
+  bool Bound() const {
+    assert(id != 0);
+    GLint current_vbo;
+    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &current_vbo);
+    return this->id && this->id == (GLuint)current_vbo;
+  }
 };
 
 void Create(VBO *vbo_arr, GLuint count);
@@ -644,7 +688,7 @@ class Shader {
     return GetInfoLog();
   }
 
-  std::unique_ptr<char> GetInfoLog(GLsizei *length_ptr = nullptr) {
+  std::unique_ptr<char> GetInfoLog(GLsizei *length_ptr = nullptr) const {
     char *info_log;
 
     // The size of the info log. size is better name than length because it
@@ -664,7 +708,7 @@ class Shader {
 
   /// Returns the concatenation of the source strings that make up the shader
   /// source for the shader, including the null termination character.
-  std::unique_ptr<char> GetSource(GLsizei *length_ptr = nullptr) {
+  std::unique_ptr<char> GetSource(GLsizei *length_ptr = nullptr) const {
     char *source;
 
     // The size includes the 0 terminating character.
@@ -680,20 +724,20 @@ class Shader {
     return std::unique_ptr<char>(source);
   }
 
-  GLenum GetType() {
+  GLenum GetType() const {
     GLint type;
     glGetShaderiv(id, GL_SHADER_TYPE, &type);
     return type;
   }
 
   /// Returns whether the shader is flagged for deletion.
-  bool IsDeleted() {
+  bool IsDeleted() const {
     GLint deleted;
     glGetShaderiv(id, GL_DELETE_STATUS, &deleted);
     return deleted == GL_TRUE;
   }
 
-  bool IsCompiled() {
+  bool IsCompiled() const {
     GLint compiled;
     glGetShaderiv(id, GL_COMPILE_STATUS, &compiled);
     return compiled == GL_TRUE;
@@ -767,7 +811,7 @@ class Program {
     return message;
   }
 
-  std::unique_ptr<char> GetInfoLog(GLsizei *length_p = nullptr) {
+  std::unique_ptr<char> GetInfoLog(GLsizei *length_p = nullptr) const {
     char *info_log;
 
     // The size of the info log. size is better name than length because it
@@ -784,7 +828,7 @@ class Program {
     return std::unique_ptr<char>(info_log);
   }
 
-  std::unique_ptr<char> ValidationLog(bool *is_valid, GLsizei *length_ptr = nullptr) {
+  std::unique_ptr<char> ValidationLog(bool *is_valid, GLsizei *length_ptr = nullptr) const {
     // Validate the program
     glValidateProgram(id);
 
@@ -797,7 +841,7 @@ class Program {
     return GetInfoLog(length_ptr);
   }
 
-  std::unique_ptr<Shader> GetAttachedShaders(GLint *count_ptr) {
+  std::unique_ptr<Shader> GetAttachedShaders(GLint *count_ptr) const {
     glGetProgramiv(id, GL_ATTACHED_SHADERS, count_ptr);
     if (*count_ptr == 0) {
       return nullptr;
@@ -809,13 +853,13 @@ class Program {
     return std::unique_ptr<Shader>(reinterpret_cast<Shader *>(shaders));
   }
 
-  bool IsLinked() {
+  bool IsLinked() const {
     GLint linked;
     glGetProgramiv(id, GL_LINK_STATUS, &linked);
     return linked == GL_TRUE;
   }
 
-  bool IsDeleted() {
+  bool IsDeleted() const {
     GLint deleted;
     glGetProgramiv(id, GL_DELETE_STATUS, &deleted);
     return deleted == GL_TRUE;
@@ -1046,7 +1090,7 @@ class TextureCommonTemplate : public Texture {
 
   void Unbind() const { glBindTexture(kTarget, 0); }
 
-  bool Bound() {
+  bool Bound() const {
     GLint current_texture;
     glGetIntegerv(kBinding, &current_texture);
     return this->id && this->id == (GLuint)current_texture;
