@@ -584,16 +584,6 @@ class VBO {
     glDeleteBuffers(1, &id);
   }
 
-  void Bind(GLenum target) const {
-    assert(id != 0);
-    glBindBuffer(target, id);
-  }
-
-  void Unbind(GLenum target) const {
-    assert(Bound());
-    glBindBuffer(target, 0);
-  }
-
   void Bind() const {
     assert(id != 0);
     glBindBuffer(GL_ARRAY_BUFFER, id);
