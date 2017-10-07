@@ -568,9 +568,13 @@ class VBO {
 
   bool Bound() const {
     assert(id != 0);
+    return id && id == CurrentBinding().id;
+  }
+
+  static VBO CurrentBinding() {
     GLint current_vbo;
     glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &current_vbo);
-    return this->id && this->id == (GLuint)current_vbo;
+    return VBO((GLuint)current_vbo);
   }
 
   void LoadBufferData(const GLvoid *data, GLsizeiptr size) {
@@ -653,9 +657,13 @@ class VAO {
 
   bool Bound() const {
     assert(id != 0);
+    return id && id == CurrentBinding().id;
+  }
+
+  static VAO CurrentBinding() {
     GLint current_vao;
     glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
-    return this->id && this->id == (GLuint)current_vao;
+    return VAO((GLuint)current_vao);
   }
 
   static GLint MaxNumberOfArrays() {
