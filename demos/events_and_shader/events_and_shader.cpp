@@ -19,13 +19,134 @@ using namespace proto3d::gl;
 GlobalGui gui;
 GWindow *main_window;
 
-Shader shaders[2];
-Program program;
-VBO vbo;
-VAO vao;
-Texture2D texture;
+class Scene {
+ public:
+  Shader shaders[2];
+  Program program;
+  VAO vao;
+  VBO vbo;
+  Texture2D texture;
 
-void FlushFrame();
+  void CompileShaders(const std::string &base_relative_path) {
+    char shader_source[4096];
+    string shader_path = base_relative_path + "/shaders.glsl";
+    if (ReadShaderSource(shader_path.c_str(), shader_source, 4096) < 0) {
+      perror("ReadShaderSource");
+      exit(3);
+    }
+    const char *sources_vert[] = {"#version 330\n#define VERTEX_SHADER\n", shader_source};
+    shaders[0]                 = shader::Compile(GL_VERTEX_SHADER, 2, (const char **)sources_vert);
+    const char *sources_frag[] = {"#version 330\n#define FRAGMENT_SHADER\n", shader_source};
+    shaders[1] = shader::Compile(GL_FRAGMENT_SHADER, 2, (const char **)sources_frag);
+
+    // Link into a Program
+    //
+    // Can be done in a single line: program = shader::Link(shaders, 2);
+    program.Create();
+    program.AttachShaders(shaders[0], shaders[1]);
+    {
+      auto log = program.Link();
+      assert(log == nullptr);
+      GLint count;
+      auto attached_shaders = program.GetAttachedShaders(&count);
+      printf("Count attached shaders: %d\n", count);
+      if (attached_shaders != nullptr) {
+        puts("Source of first shader:");
+        puts(attached_shaders.get()[0].GetSource().get());
+      }
+    }
+    program.DetachShaders(shaders[0], shaders[1]);
+    shaders[0].Delete();
+    shaders[1].Delete();
+
+    bool valid;
+    auto validation_log = program.ValidationLog(&valid).get();
+    if (!valid) {
+      puts("Shader program is invalid.");
+      puts(validation_log);
+    }
+  }
+
+  void LoadTriangleObject(const std::string &base_relative_path) {
+    vao.Create();
+    vao.Bind();
+    vbo.Create();
+    vbo.Bind();
+    // clang-format off
+    GLfloat vertex_data[] = {
+       // x    y     z      u    v
+       0.0f,  0.8f, 0.0f,  0.5f, 1.0f,
+      -0.8f, -0.8f, 0.0f,  0.0f, 0.0f,
+       0.8f, -0.8f, 0.0f,  1.0f, 0.0f
+    };
+    // clang-format on
+    vbo.LoadBufferData(vertex_data, sizeof(vertex_data));
+
+    VertexPointerFormat vertex_ptr_format(3);
+    vertex_ptr_format.stride = 5 * sizeof(GLfloat);
+
+    VertexPointerFormat uv_ptr_format(2);
+    uv_ptr_format.normalized = GL_TRUE;
+    uv_ptr_format.stride     = 5 * sizeof(GLfloat);
+    uv_ptr_format.offset     = 3 * sizeof(GLfloat);
+
+    // connect the xyz to the "vert" attribute of the vertex shader
+    vao.AddArray(program.AttribLocation("vert"), vbo, vertex_ptr_format);
+
+    // Load the texture into the triangle
+    auto image = stb::Image::CreateFromFile((base_relative_path + "/hazard.png").c_str());
+
+    glActiveTexture(GL_TEXTURE0);
+    program.SetUniform("tex", 0);
+
+    // connect the uv coords to the "vertTexCoord" attribute of the vertex
+    // shader
+    vao.AddArray(program.AttribLocation("vertTexCoord"), vbo, uv_ptr_format);
+    texture.Gen();
+    texture.Bind();
+    texture.SetFilterAndWrap(GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
+    texture.LoadImage(image.get());
+    texture.GenerateMipmaps();
+  }
+
+  void RenderFrame() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    vao.Bind();
+    program.Bind();
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    gl_swap_buffers(main_window);
+  }
+
+#ifndef NDEBUG
+  void Delete() {
+    program.Unbind();
+    vao.Unbind();
+    vbo.Unbind();
+
+    vao.Delete();
+    vbo.Delete();
+    texture.Delete();
+    program.Delete();
+  }
+#endif  // !NDEBUG
+
+ private:
+  int ReadShaderSource(const char *path, char *buffer, size_t size) {
+    puts(path);
+    int fd = open(path, O_RDONLY);
+    if (fd < 0) {
+      return fd;
+    }
+
+    ssize_t count_read;
+    while ((count_read = read(fd, buffer, size)) > 0) {
+      buffer[count_read] = 0;
+    }
+    return count_read;
+  }
+};
+
+Scene scene;
 
 void DumpEventString(GWindowEvent *event) {
   GWindowEventData *e = &event->e;
@@ -125,7 +246,7 @@ void HandleEvent(GWindowEvent event) {
       }
       break;
     case kWindowDamage:
-      FlushFrame();
+      scene.RenderFrame();
       break;
     case kWindowClose:
       event.window->closed = true;
@@ -133,26 +254,6 @@ void HandleEvent(GWindowEvent event) {
     default:
       break;
   }
-}
-
-int ReadShaderSource(const char *path, char *buffer, size_t size) {
-  puts(path);
-  int fd = open(path, O_RDONLY);
-  if (fd < 0) {
-    return fd;
-  }
-
-  ssize_t count_read;
-  while ((count_read = read(fd, buffer, size)) > 0) {
-    buffer[count_read] = 0;
-  }
-  return count_read;
-}
-
-void FlushFrame() {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glDrawArrays(GL_TRIANGLES, 0, 3);
-  gl_swap_buffers(main_window);
 }
 
 std::string GetBaseRelativePath(const char *argv_0) {
@@ -190,7 +291,7 @@ int main(int argc, char *argv[]) {
 #endif
 
   // Clear the window
-  glClearColor(1.0, 0.5, 0.0, 1.0);  // white
+  glClearColor(1.0, 0.5, 0.0, 1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   gl_swap_buffers(main_window);
 
@@ -201,107 +302,22 @@ int main(int argc, char *argv[]) {
   string base_relative_path = GetBaseRelativePath(argv[0]);
 
   // Compile shaders
-  char shader_source[4096];
-  string shader_path = base_relative_path + "/shaders.glsl";
-  if (ReadShaderSource(shader_path.c_str(), shader_source, 4096) < 0) {
-    perror("ReadShaderSource");
-    return 3;
-  }
-  const char *sources_vert[] = {"#version 330\n#define VERTEX_SHADER\n", shader_source};
-  shaders[0]                 = shader::Compile(GL_VERTEX_SHADER, 2, (const char **)sources_vert);
-  const char *sources_frag[] = {"#version 330\n#define FRAGMENT_SHADER\n", shader_source};
-  shaders[1]                 = shader::Compile(GL_FRAGMENT_SHADER, 2, (const char **)sources_frag);
+  scene.CompileShaders(base_relative_path);
+  scene.LoadTriangleObject(base_relative_path);
 
-  // Link into a Program
-  //
-  // Can be done in a single line: program = shader::Link(shaders, 2);
-  program.Create();
-  program.AttachShaders(shaders[0], shaders[1]);
-  {
-    auto log = program.Link();
-    assert(log == nullptr);
-    GLint count;
-    auto attached_shaders = program.GetAttachedShaders(&count);
-    printf("Count attached shaders: %d\n", count);
-    if (attached_shaders != nullptr) {
-      puts("Source of first shader:");
-      puts(attached_shaders.get()[0].GetSource().get());
-    }
-  }
-  program.DetachShaders(shaders[0], shaders[1]);
-  shaders[0].Delete();
-  shaders[1].Delete();
-
-  // Load the triangle
-  vao.Create();
-  vao.Bind();
-  vbo.Create();
-  vbo.Bind();
-  // clang-format off
-  GLfloat vertex_data[] = {
-     // x    y     z      u    v
-     0.0f,  0.8f, 0.0f,  0.5f, 1.0f,
-    -0.8f, -0.8f, 0.0f,  0.0f, 0.0f,
-     0.8f, -0.8f, 0.0f,  1.0f, 0.0f
-  };
-  // clang-format on
-  vbo.LoadBufferData(vertex_data, sizeof(vertex_data));
-
-  VertexPointerFormat vertex_ptr_format(3);
-  vertex_ptr_format.stride = 5 * sizeof(GLfloat);
-
-  VertexPointerFormat uv_ptr_format(2);
-  uv_ptr_format.normalized = GL_TRUE;
-  uv_ptr_format.stride     = 5 * sizeof(GLfloat);
-  uv_ptr_format.offset     = 3 * sizeof(GLfloat);
-
-  // connect the xyz to the "vert" attribute of the vertex shader
-  vao.AddArray(program.AttribLocation("vert"), vbo, vertex_ptr_format);
-
-  // Load the texture into the triangle
-  auto image = stb::Image::CreateFromFile((base_relative_path + "/hazard.png").c_str());
-
-  glActiveTexture(GL_TEXTURE0);
-  program.SetUniform("tex", 0);
-
-  bool valid;
-  auto validation_log = program.ValidationLog(&valid).get();
-  if (!valid) {
-    puts("Shader program is invalid.");
-    puts(validation_log);
-  }
-
-  texture.Gen();
-  texture.Bind();
-  texture.SetFilterAndWrap(GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE);
-  texture.LoadImage(image.get());
-  texture.GenerateMipmaps();
-
-  // connect the uv coords to the "vertTexCoord" attribute of the vertex
-  // shader
-  vao.AddArray(program.AttribLocation("vertTexCoord"), vbo, uv_ptr_format);
-
-  program.Bind();
-
-  // Attach our even handler
+  // Attach our event handler
   gui.handle_event = HandleEvent;
 
   // Render the first frame
-  FlushFrame();
+  scene.RenderFrame();
 
   do {
     gui_poll_events(&gui);
     gui_wait_events(&gui);
   } while (!main_window->closed);
 
-  program.Unbind();
-
 #ifndef NDEBUG
-  vao.Delete();
-  vbo.Delete();
-  texture.Delete();
-  program.Delete();
-
+  scene.Delete();
   gl::CheckLeaks();
 #endif
 
