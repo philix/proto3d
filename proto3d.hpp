@@ -552,7 +552,7 @@ class VBO {
   }
 
   void Delete() {
-    assert(id != 0);
+    assert(!Bound());
     glDeleteBuffers(1, &id);
   }
 
@@ -597,6 +597,9 @@ void Create(VBO *vbo_arr, GLuint count) {
 }
 
 void Delete(VBO *vbo_arr, GLuint count) {
+  for (GLuint i = 0; i < count; i++) {
+    assert(!vbo_arr[i].Bound());
+  }
   glDeleteBuffers(count, reinterpret_cast<GLuint *>(vbo_arr));
 }
 #endif  // PROTO3D_IMPLEMENTATION
@@ -641,7 +644,7 @@ class VAO {
   }
 
   void Delete() {
-    assert(id != 0);
+    assert(!Bound());
     glDeleteVertexArrays(1, &id);
   }
 
@@ -731,6 +734,9 @@ void Create(VAO *vao_arr, GLuint count) {
 }
 
 void Delete(VAO *vao_arr, GLuint count) {
+  for (GLuint i = 0; i < count; i++) {
+    assert(!vao_arr[i].Bound());
+  }
   glDeleteVertexArrays(count, reinterpret_cast<GLuint *>(vao_arr));
 }
 #endif  // PROTO3D_IMPLEMENTATION
